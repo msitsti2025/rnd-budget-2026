@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 국가 R&D 예산 분석 플랫폼</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1f2d45;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent3: #93c5fd;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --teal: #14b8a6;
+    --pink: #ec4899;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --font-main: 'Pretendard', 'Noto Sans KR', sans-serif;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #0d1426 0%, #111827 50%, #0d1f3c 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .header-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .header-stats {
+    display: flex; gap: 24px;
+  }
+  .hstat {
+    text-align: right;
+  }
+  .hstat-val { font-size: 20px; font-weight: 700; color: var(--accent2); }
+  .hstat-label { font-size: 10px; color: var(--text3); }
+
+  /* ── Layout ── */
+  .main-layout {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .filter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .filter-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .search-box {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--text3); }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .tag {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tag:hover { border-color: var(--accent); color: var(--accent2); }
+  .tag.active {
+    background: rgba(59,130,246,0.15);
+    border-color: var(--accent);
+    color: var(--accent2);
+  }
+  .tag.all-tag {
+    background: rgba(59,130,246,0.08);
+  }
+  .tag.all-tag.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .select-box {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 12px;
+    outline: none;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .select-box:focus { border-color: var(--accent); }
+  option { background: var(--surface2); }
+
+  .reset-btn {
+    width: 100%;
+    padding: 8px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    color: var(--red);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .reset-btn:hover { background: rgba(239,68,68,0.2); }
+
+  /* ── Main Content ── */
+  .content { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── KPI Row ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), var(--purple)); }
+  .kpi-card.green::before { background: linear-gradient(90deg, var(--green), var(--teal)); }
+  .kpi-card.yellow::before { background: linear-gradient(90deg, var(--yellow), var(--pink)); }
+  .kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+  .kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .kpi-unit { font-size: 13px; font-weight: 400; color: var(--text2); margin-left: 4px; }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* ── Charts Grid ── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-title-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .chart-wrap {
+    position: relative;
+    height: 260px;
+  }
+  .chart-wrap.tall { height: 320px; }
+
+  /* ── Table ── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .table-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+  .table-count {
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--surface2);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--text3);
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--text2); }
+  th.sorted { color: var(--accent2); }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(31,45,69,0.5);
+    color: var(--text2);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(59,130,246,0.04); }
+  .td-name {
+    color: var(--text);
+    font-weight: 500;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .td-budget { color: var(--accent2); font-weight: 600; text-align: right; }
+  .td-ministry {
+    background: rgba(59,130,246,0.08);
+    color: var(--accent3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .td-committee {
+    background: rgba(139,92,246,0.08);
+    color: #a78bfa;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .st-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .page-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: var(--accent); color: var(--accent2); }
+  .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── Tech badges ── */
+  .tech-badges { display: flex; flex-wrap: wrap; gap: 3px; max-width: 200px; }
+  .tech-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* ── Loading overlay ── */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    gap: 16px;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text3); font-size: 14px; }
+
+  /* ── Tooltip ── */
+  .tooltip-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; font-size: 12px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">데이터 로딩 중...</div>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🔬</div>
+      <div>
+        <div class="logo-text">국가 R&D 예산 분석 플랫폼</div>
+        <div class="logo-sub">2026년 국가연구개발사업 세부사업 현황 · 국가과학기술자문회의</div>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">
+        <div class="hstat-val" id="h-total-budget">-</div>
+        <div class="hstat-label">총 예산 (조원)</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val" id="h-total-projects">-</div>
+        <div class="hstat-label">세부사업 수</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val" id="h-ministries">-</div>
+        <div class="hstat-label">참여 부처</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="main-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="filter-card">
+      <div class="filter-title">사업명 검색</div>
+      <input type="text" class="search-box" id="search-input" placeholder="사업명 검색...">
+    </div>
+
+    <div class="filter-card">
+      <div class="filter-title">전문위원회</div>
+      <div class="tag-list" id="committee-tags"></div>
+    </div>
+
+    <div class="filter-card">
+      <div class="filter-title">부처</div>
+      <select class="select-box" id="ministry-select">
+        <option value="">전체 부처</option>
+      </select>
+    </div>
+
+    <div class="filter-card">
+      <div class="filter-title">국가전략기술</div>
+      <div class="tag-list" id="strategic-tags"></div>
+    </div>
+
+    <div class="filter-card">
+      <div class="filter-title">정책분야</div>
+      <div class="tag-list" id="policy-tags"></div>
+    </div>
+
+    <button class="reset-btn" onclick="resetFilters()">⟳ 필터 초기화</button>
+  </aside>
+
+  <!-- Main -->
+  <main class="content">
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card blue">
+        <div class="kpi-label">필터링된 총 예산</div>
+        <div class="kpi-value" id="kpi-budget">-<span class="kpi-unit">조원</span></div>
+        <div class="kpi-sub" id="kpi-budget-pct">전체 대비 -</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">세부사업 수</div>
+        <div class="kpi-value" id="kpi-projects">-<span class="kpi-unit">개</span></div>
+        <div class="kpi-sub" id="kpi-projects-pct">전체 대비 -</div>
+      </div>
+      <div class="kpi-card yellow">
+        <div class="kpi-label">전략기술 해당 사업</div>
+        <div class="kpi-value" id="kpi-strategic">-<span class="kpi-unit">개</span></div>
+        <div class="kpi-sub" id="kpi-strategic-budget">예산 -</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">평균 사업 예산</div>
+        <div class="kpi-value" id="kpi-avg">-<span class="kpi-unit">억원</span></div>
+        <div class="kpi-sub" id="kpi-avg-sub">최대 -</div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-title-dot" style="background:#3b82f6"></div>국가전략기술별 예산 배분</div>
+        <div class="chart-wrap"><canvas id="chart-strategic"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-title-dot" style="background:#8b5cf6"></div>정책분야별 예산 배분</div>
+        <div class="chart-wrap"><canvas id="chart-policy"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-title-dot" style="background:#10b981"></div>부처별 R&D 예산 TOP 15</div>
+        <div class="chart-wrap tall"><canvas id="chart-ministry"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-title-dot" style="background:#f59e0b"></div>전문위원회별 예산</div>
+        <div class="chart-wrap tall"><canvas id="chart-committee"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">세부사업 목록</div>
+        <div class="table-count" id="table-count">0개</div>
+      </div>
+      <div class="table-wrap">
+        <table id="main-table">
+          <thead>
+            <tr>
+              <th onclick="sortBy('seq')" id="th-seq">#</th>
+              <th onclick="sortBy('name')" id="th-name">세부사업명</th>
+              <th onclick="sortBy('ministry')" id="th-ministry">부처</th>
+              <th onclick="sortBy('committee')" id="th-committee">전문위</th>
+              <th onclick="sortBy('budget')" id="th-budget">예산(백만원) ▼</th>
+              <th>전략기술</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Color palettes ──
+const ST_COLORS = [
+  '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444',
+  '#14b8a6','#f97316','#6366f1','#ec4899','#84cc16','#06b6d4','#a855f7'
+];
+const PF_COLORS = [
+  '#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#14b8a6','#f97316','#6366f1'
+];
+const MIN_COLORS = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#14b8a6',
+  '#f97316','#6366f1','#ec4899','#84cc16','#06b6d4','#a855f7','#fb7185','#34d399','#fbbf24'];
+
+const ST_NAMES = ['인공지능','첨단바이오','양자','우주항공해양','반도체/디스플레이',
+  '첨단모빌리티','첨단로봇제조','차세대통신','수소','차세대원자력','이차전지','사이버보안'];
+const PF_NAMES = ['기초','탄소중립','국방','출연직할','재난안전','지역','기술사업화','인력양성'];
+
+// ── State ──
+let allData = [];
+let filtered = [];
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let sortKey = 'budget';
+let sortDir = -1;
+let charts = {};
+
+// Filters
+let filters = {
+  search: '',
+  committee: '',
+  ministry: '',
+  strategic: '',
+  policy: ''
+};
+
+// ── Load Data ──
+async function loadData() {
+  const res = await fetch('data.json');
+  allData = await res.json();
+  init();
+}
+
+function init() {
+  buildFilters();
+  applyFilters();
+  document.getElementById('loading').style.display = 'none';
+  
+  // Header stats
+  const total = allData.reduce((s,r)=>s+r.budget,0);
+  document.getElementById('h-total-budget').textContent = (total/1000000).toFixed(2);
+  document.getElementById('h-total-projects').textContent = allData.length.toLocaleString();
+  const mins = new Set(allData.map(r=>r.ministry)).size;
+  document.getElementById('h-ministries').textContent = mins;
+}
+
+// ── Build Filter UI ──
+function buildFilters() {
+  // Committee tags
+  const committees = [...new Set(allData.map(r=>r.committee))].sort();
+  const ctEl = document.getElementById('committee-tags');
+  ctEl.innerHTML = `<button class="tag all-tag active" onclick="setFilter('committee','')">전체</button>`;
+  committees.forEach(c => {
+    ctEl.innerHTML += `<button class="tag" onclick="setFilter('committee','${c}')">${c}</button>`;
+  });
+
+  // Ministry select
+  const ministries = [...new Set(allData.map(r=>r.ministry))].sort();
+  const mEl = document.getElementById('ministry-select');
+  ministries.forEach(m => {
+    mEl.innerHTML += `<option value="${m}">${m}</option>`;
+  });
+  mEl.addEventListener('change', e => setFilter('ministry', e.target.value));
+
+  // Strategic tech tags
+  const stEl = document.getElementById('strategic-tags');
+  stEl.innerHTML = `<button class="tag all-tag active" onclick="setFilter('strategic','')">전체</button>`;
+  ST_NAMES.forEach((n,i) => {
+    stEl.innerHTML += `<button class="tag" onclick="setFilter('strategic','${n}')" style="--tc:${ST_COLORS[i]}">${n}</button>`;
+  });
+
+  // Policy tags
+  const pfEl = document.getElementById('policy-tags');
+  pfEl.innerHTML = `<button class="tag all-tag active" onclick="setFilter('policy','')">전체</button>`;
+  PF_NAMES.forEach((n,i) => {
+    pfEl.innerHTML += `<button class="tag" onclick="setFilter('policy','${n}')">${n}</button>`;
+  });
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', e => {
+    filters.search = e.target.value;
+    applyFilters();
+  });
+}
+
+function setFilter(key, val) {
+  filters[key] = val;
+  // Update tag active states
+  if (key === 'committee') {
+    document.querySelectorAll('#committee-tags .tag').forEach(t => {
+      const isAll = t.classList.contains('all-tag');
+      t.classList.toggle('active', isAll ? val==='' : t.textContent===val);
+    });
+  }
+  if (key === 'strategic') {
+    document.querySelectorAll('#strategic-tags .tag').forEach(t => {
+      const isAll = t.classList.contains('all-tag');
+      t.classList.toggle('active', isAll ? val==='' : t.textContent===val);
+    });
+  }
+  if (key === 'policy') {
+    document.querySelectorAll('#policy-tags .tag').forEach(t => {
+      const isAll = t.classList.contains('all-tag');
+      t.classList.toggle('active', isAll ? val==='' : t.textContent===val);
+    });
+  }
+  currentPage = 1;
+  applyFilters();
+}
+
+function resetFilters() {
+  filters = { search:'', committee:'', ministry:'', strategic:'', policy:'' };
+  document.getElementById('search-input').value = '';
+  document.getElementById('ministry-select').value = '';
+  document.querySelectorAll('.tag').forEach(t => t.classList.toggle('active', t.classList.contains('all-tag')));
+  currentPage = 1;
+  applyFilters();
+}
+
+// ── Apply Filters ──
+function applyFilters() {
+  filtered = allData.filter(r => {
+    if (filters.search && !r.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
+    if (filters.committee && r.committee !== filters.committee) return false;
+    if (filters.ministry && r.ministry !== filters.ministry) return false;
+    if (filters.strategic && !r.strategic[filters.strategic]) return false;
+    if (filters.policy && !r.policy[filters.policy]) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a,b) => {
+    let av = sortKey==='budget'||sortKey==='seq' ? (a[sortKey]||0) : (a[sortKey]||'');
+    let bv = sortKey==='budget'||sortKey==='seq' ? (b[sortKey]||0) : (b[sortKey]||'');
+    if (av < bv) return -sortDir;
+    if (av > bv) return sortDir;
+    return 0;
+  });
+
+  updateKPIs();
+  updateCharts();
+  renderTable();
+}
+
+// ── KPIs ──
+function updateKPIs() {
+  const totalBudget = allData.reduce((s,r)=>s+r.budget,0);
+  const fBudget = filtered.reduce((s,r)=>s+r.budget,0);
+  const fCount = filtered.length;
+  const stCount = filtered.filter(r=>ST_NAMES.some(n=>r.strategic[n]>0)).length;
+  const stBudget = filtered.reduce((s,r)=>s+ST_NAMES.reduce((ss,n)=>ss+(r.strategic[n]||0),0),0);
+  const avgBudget = fCount ? fBudget/fCount : 0;
+  const maxBudget = filtered.reduce((m,r)=>Math.max(m,r.budget),0);
+
+  document.getElementById('kpi-budget').innerHTML = `${(fBudget/1000000).toFixed(2)}<span class="kpi-unit">조원</span>`;
+  document.getElementById('kpi-budget-pct').textContent = `전체 대비 ${totalBudget ? (fBudget/totalBudget*100).toFixed(1) : 0}%`;
+  document.getElementById('kpi-projects').innerHTML = `${fCount.toLocaleString()}<span class="kpi-unit">개</span>`;
+  document.getElementById('kpi-projects-pct').textContent = `전체 ${allData.length}개 대비 ${allData.length ? (fCount/allData.length*100).toFixed(1):0}%`;
+  document.getElementById('kpi-strategic').innerHTML = `${stCount.toLocaleString()}<span class="kpi-unit">개</span>`;
+  document.getElementById('kpi-strategic-budget').textContent = `예산 ${(stBudget/1000000).toFixed(2)}조원`;
+  document.getElementById('kpi-avg').innerHTML = `${(avgBudget/100).toFixed(0)}<span class="kpi-unit">억원</span>`;
+  document.getElementById('kpi-avg-sub').textContent = `최대 ${(maxBudget/100).toFixed(0)}억원`;
+}
+
+// ── Charts ──
+function updateCharts() {
+  // Strategic tech
+  const stData = ST_NAMES.map(n => filtered.reduce((s,r)=>s+(r.strategic[n]||0),0));
+  renderBarChart('chart-strategic', ST_NAMES, stData, ST_COLORS, '백만원');
+
+  // Policy field
+  const pfData = PF_NAMES.map(n => filtered.reduce((s,r)=>s+(r.policy[n]||0),0));
+  renderDoughnutChart('chart-policy', PF_NAMES, pfData, PF_COLORS);
+
+  // Ministry top 15
+  const minMap = {};
+  filtered.forEach(r => { minMap[r.ministry] = (minMap[r.ministry]||0) + r.budget; });
+  const minEntries = Object.entries(minMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  renderHBarChart('chart-ministry', minEntries.map(e=>e[0]), minEntries.map(e=>e[1]), MIN_COLORS);
+
+  // Committee
+  const comMap = {};
+  filtered.forEach(r => { comMap[r.committee] = (comMap[r.committee]||0) + r.budget; });
+  const comEntries = Object.entries(comMap).sort((a,b)=>b[1]-a[1]);
+  renderHBarChart('chart-committee', comEntries.map(e=>e[0]), comEntries.map(e=>e[1]), ST_COLORS);
+}
+
+function renderBarChart(id, labels, data, colors, unit) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.map(c => c+'33'),
+        borderColor: colors,
+        borderWidth: 1.5,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${(ctx.raw/100).toFixed(0)}억원`
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color:'#64748b', font:{size:10} }, grid:{color:'#1f2d45'} },
+        y: { ticks: { color:'#64748b', font:{size:10},
+              callback: v => v>=1000000 ? (v/1000000).toFixed(1)+'조' : v>=10000 ? (v/10000).toFixed(0)+'억' : v
+            }, grid:{color:'#1f2d45'} }
+      }
+    }
+  });
+}
+
+function renderDoughnutChart(id, labels, data, colors) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderColor:'#0a0e1a', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position:'right', labels:{ color:'#94a3b8', font:{size:11}, padding:8, boxWidth:12 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.label}: ${(ctx.raw/100).toFixed(0)}억원 (${(ctx.raw/ctx.dataset.data.reduce((a,b)=>a+b,0)*100).toFixed(1)}%)`
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderHBarChart(id, labels, data, colors) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors.map((c,i) => colors[i%colors.length]+'44'),
+        borderColor: colors.map((c,i) => colors[i%colors.length]),
+        borderWidth: 1.5,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${(ctx.raw/100).toFixed(0)}억원`
+          }
+        }
+      },
+      scales: {
+        x: { ticks:{ color:'#64748b', font:{size:10},
+              callback: v => v>=1000000 ? (v/1000000).toFixed(1)+'조' : (v/10000).toFixed(0)+'억'
+            }, grid:{color:'#1f2d45'} },
+        y: { ticks:{ color:'#94a3b8', font:{size:11} }, grid:{color:'#1f2d45'} }
+      }
+    }
+  });
+}
+
+// ── Table ──
+function sortBy(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = key==='budget'||key==='seq' ? -1 : 1; }
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  document.getElementById(`th-${key}`)?.classList.add('sorted');
+  applyFilters();
+}
+
+function renderTable() {
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page = filtered.slice(start, start+PAGE_SIZE);
+  const tbody = document.getElementById('table-body');
+  document.getElementById('table-count').textContent = `${filtered.length.toLocaleString()}개`;
+
+  tbody.innerHTML = page.map(r => {
+    const techTags = ST_NAMES
+      .filter(n=>r.strategic[n]>0)
+      .map((n,i) => {
+        const idx = ST_NAMES.indexOf(n);
+        return `<span class="tech-badge" style="background:${ST_COLORS[idx]}22;color:${ST_COLORS[idx]}">${n}</span>`;
+      }).join('');
+
+    return `<tr>
+      <td style="color:var(--text3);font-size:11px">${r.seq}</td>
+      <td class="td-name" title="${r.name}">${r.name}</td>
+      <td><span class="td-ministry">${r.ministry}</span></td>
+      <td><span class="td-committee">${r.committee}</span></td>
+      <td class="td-budget">${r.budget.toLocaleString()}</td>
+      <td><div class="tech-badges">${techTags||'<span style="color:var(--text3);font-size:11px">해당없음</span>'}</div></td>
+    </tr>`;
+  }).join('');
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  const el = document.getElementById('pagination');
+  if (total <= 1) { el.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  
+  const range = [];
+  for (let i=1; i<=total; i++) {
+    if (i===1||i===total||Math.abs(i-currentPage)<=2) range.push(i);
+    else if (range[range.length-1]!=='…') range.push('…');
+  }
+  range.forEach(p => {
+    if (p==='…') html += `<span style="color:var(--text3);padding:0 4px">…</span>`;
+    else html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  
+  html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  if (p < 1 || p > total) return;
+  currentPage = p;
+  renderTable();
+  document.querySelector('.table-card').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ── Start ──
+loadData().catch(e => {
+  document.getElementById('loading').innerHTML = `<div style="color:#ef4444;text-align:center">
+    <div style="font-size:32px">⚠️</div>
+    <div style="margin-top:12px">데이터 로드 실패: ${e.message}</div>
+    <div style="font-size:12px;color:#64748b;margin-top:8px">data.json 파일이 같은 폴더에 있는지 확인하세요</div>
+  </div>`;
+});
+</script>
+</body>
+</html>
