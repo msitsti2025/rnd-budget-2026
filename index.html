@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>한 눈에 보는 국가 R&D 예산</title>
+<title>한 눈에 보는 2026년 정부 R&D 예산</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
@@ -195,7 +195,7 @@ tr:hover td{background:#f8fbff}
     <div class="logo">
       <div class="logo-icon">🔬</div>
       <div>
-        <div class="logo-text">한 눈에 보는 국가 R&D 예산</div>
+        <div class="logo-text">한 눈에 보는 2026년 정부 R&D 예산</div>
         <div class="logo-sub">2026년 국가연구개발사업 세부·내역사업 현황 · 과학기술혁신본부</div>
       </div>
     </div>
@@ -412,7 +412,7 @@ tr:hover td{background:#f8fbff}
     <div class="tab-panel" id="panel-ministry">
       <div class="chart-card">
         <div class="chart-title"><div class="chart-title-dot" style="background:#059669"></div>부처별 R&D 예산 현황 (전체)</div>
-        <div class="chart-wrap h400"><canvas id="min-full-chart"></canvas></div>
+        <div class="chart-wrap" style="height:480px"><canvas id="min-full-chart"></canvas></div>
       </div>
       <div class="table-card">
         <div class="table-header">
@@ -476,6 +476,7 @@ tr:hover td{background:#f8fbff}
               <th onclick="listSortBy('budget')" id="lt-budget">예산(백만원) ▼</th>
               <th onclick="listSortBy('detailCount')" id="lt-detail">내역수</th>
               <th class="nosort">전략기술</th>
+              <th class="nosort">정책분야</th>
             </tr></thead>
             <tbody id="list-table-body"></tbody>
           </table>
@@ -977,9 +978,16 @@ function renderMinistry(){
   const total=entries.reduce((s,e)=>s+e[1].budget,0);
 
   mkChart('min-full-chart',{type:'bar',data:{labels:entries.map(e=>e[0]),
-    datasets:[{data:entries.map(e=>e[1].budget),backgroundColor:entries.map((_,i)=>ST_COLORS[i%ST_COLORS.length]+'55'),borderColor:entries.map((_,i)=>ST_COLORS[i%ST_COLORS.length]),borderWidth:1.5,borderRadius:4}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtBudget(c.raw)}}},
-    scales:{x:{ticks:{color:TC,font:{size:10},callback:barY},grid:GRID},y:{ticks:{color:'#334155',font:{size:11}},grid:GRID}}}});
+    datasets:[{data:entries.map(e=>e[1].budget),
+      backgroundColor:entries.map((_,i)=>ST_COLORS[i%ST_COLORS.length]+'66'),
+      borderColor:entries.map((_,i)=>ST_COLORS[i%ST_COLORS.length]),
+      borderWidth:1.5,borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmtBudget(c.raw)} (${pct(c.raw,total)})`}}},
+      scales:{
+        x:{ticks:{color:'#334155',font:{size:11},maxRotation:45,minRotation:30},grid:{display:false}},
+        y:{ticks:{color:TC,font:{size:11},callback:barY},grid:GRID,title:{display:true,text:'예산 규모',color:TC,font:{size:11}}}
+      }}});
 
   document.getElementById('min-table-count').textContent=`${entries.length}개 부처`;
   document.getElementById('min-table-body').innerHTML=entries.map(([m,d],i)=>{
@@ -1040,6 +1048,10 @@ function renderList(){
       const idx=ST_NAMES.indexOf(n);
       return`<span class="tech-badge" style="background:${ST_COLORS[idx]}22;color:${ST_COLORS[idx]};border-color:${ST_COLORS[idx]}44">${n}</span>`;
     }).join('');
+    const pfTags=PF_NAMES.filter(n=>r.policy[n]>0).map(n=>{
+      const idx=PF_NAMES.indexOf(n);
+      return`<span class="tech-badge" style="background:${PF_COLORS[idx]}22;color:${PF_COLORS[idx]};border-color:${PF_COLORS[idx]}44">${n}</span>`;
+    }).join('');
 
     const mainRow=document.createElement('tr');
     mainRow.innerHTML=`
@@ -1050,13 +1062,14 @@ function renderList(){
       <td><span class="chip chip-purple">${r.committee}</span></td>
       <td class="td-budget">${fmtM(r.budget)}</td>
       <td style="text-align:center"><span class="badge ${r.details.length?'badge-blue':'badge-gray'}">${r.details.length}</span></td>
-      <td><div class="tech-badges">${techTags||'<span style="color:#94a3b8;font-size:11px">해당없음</span>'}</div></td>`;
+      <td><div class="tech-badges">${techTags||'<span style="color:#94a3b8;font-size:11px">–</span>'}</div></td>
+      <td><div class="tech-badges">${pfTags||'<span style="color:#94a3b8;font-size:11px">–</span>'}</div></td>`;
     tbody.appendChild(mainRow);
 
     const detRow=document.createElement('tr');
     detRow.className=`detail-row${expandedRows.has(r.id)?' open':''}`;
     detRow.id=`det-${r.id}`;
-    detRow.innerHTML=`<td colspan="8"><div class="detail-inner">
+    detRow.innerHTML=`<td colspan="9"><div class="detail-inner">
       <table class="detail-table">
         <thead><tr><th>#</th><th>내역사업명</th><th style="text-align:right">예산(백만원)</th><th>전략기술</th><th>정책분야</th></tr></thead>
         <tbody>${r.details.map((d,i)=>{
