@@ -160,12 +160,26 @@ tr:hover td{background:#f8fbff}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{color:var(--text3);font-size:14px}
 
+/* TREEMAP */
+.treemap-container{width:100%;height:420px;position:relative;border-radius:10px;overflow:hidden;background:var(--surface2)}
+.treemap-cell{position:absolute;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 12px;cursor:default;transition:filter .15s;overflow:hidden;border:2px solid #fff;border-radius:6px;box-sizing:border-box}
+.treemap-cell:hover{filter:brightness(.93);z-index:10}
+.treemap-cell-num{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:2px}
+.treemap-cell-name{font-size:13px;font-weight:700;color:#fff;line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+.treemap-cell-val{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);margin-top:4px;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.treemap-cell-pct{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px}
+.treemap-cell.small .treemap-cell-name{font-size:11px}
+.treemap-cell.small .treemap-cell-val{font-size:10px}
+.treemap-cell.tiny .treemap-cell-name{font-size:10px}
+.treemap-cell.tiny .treemap-cell-val,.treemap-cell.tiny .treemap-cell-pct{display:none}
+
 @media(max-width:1200px){
   .main-layout{grid-template-columns:1fr}
   .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .kpi-row,.kpi-row-5{grid-template-columns:repeat(2,1fr)}
   .charts-grid{grid-template-columns:1fr}
   .core10-grid{grid-template-columns:repeat(3,1fr)}
+  .treemap-container{height:320px}
 }
 </style>
 </head>
@@ -295,9 +309,9 @@ tr:hover td{background:#f8fbff}
         <div class="chart-wrap tall"><canvas id="core10-bar-chart"></canvas></div>
       </div>
       <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>10대 핵심투자분야 비율</div>
-          <div class="chart-wrap"><canvas id="core10-donut-chart"></canvas></div>
+        <div class="chart-card wide">
+          <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>10대 핵심투자분야 예산 트리맵 <span style="font-size:11px;color:var(--text4);font-weight:400;margin-left:6px">· 박스 크기 ∝ 예산 규모</span></div>
+          <div class="treemap-container" id="core10-treemap"></div>
         </div>
         <div class="chart-card">
           <div class="chart-title"><div class="chart-title-dot" style="background:#059669"></div>핵심투자분야 × 부처 (상위 10)</div>
@@ -652,7 +666,14 @@ function mkChart(id,cfg){
 }
 const GRID={color:'#e2e8f0'};
 const TC='#94a3b8';
-function barY(v){return v>=1000000?(v/1000000).toFixed(1)+'조':v>=10000?(v/10000).toFixed(0)+'억':v;}
+function barY(v){
+  if(v===0)return'0';
+  if(v>=1000000)return(v/1000000).toFixed(1)+'조';
+  if(v>=100000) return(v/100000).toFixed(1)+'천억';
+  if(v>=10000)  return(v/10000).toFixed(0)+'백억';
+  if(v>=100)    return(v/100).toFixed(0)+'억';
+  return v+'백만';
+}
 
 // ══════════════════════════════════════════
 //  ① 종합 현황
@@ -699,6 +720,93 @@ function hbarCfg(labels,data,colors){
 }
 
 // ══════════════════════════════════════════
+//  트리맵 (Squarified Treemap)
+// ══════════════════════════════════════════
+function renderTreemap(containerId, items, total){
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  container.innerHTML='';
+  const W=container.offsetWidth||800;
+  const H=container.offsetHeight||420;
+
+  // 예산 순 정렬 + 면적 계산
+  const sorted=[...items].sort((a,b)=>b.budget-a.budget);
+  const totalBud=sorted.reduce((s,r)=>s+r.budget,0);
+  const rects=squarify(sorted.map(d=>({...d,area:(d.budget/totalBud)*W*H})),0,0,W,H);
+
+  rects.forEach((r,i)=>{
+    const cell=document.createElement('div');
+    cell.className='treemap-cell';
+    const w=r.w, h=r.h;
+    const sizeClass=w<120||h<80?'tiny':w<180||h<100?'small':'';
+    if(sizeClass)cell.classList.add(sizeClass);
+    cell.style.cssText=`left:${r.x}px;top:${r.y}px;width:${w}px;height:${h}px;background:linear-gradient(135deg,${r.color}dd,${r.color}aa)`;
+    cell.title=`${r.label}: ${fmtM(r.budget)} 백만원 (${pct(r.budget,total)})`;
+    cell.innerHTML=`
+      <div class="treemap-cell-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="treemap-cell-name">${r.label}</div>
+      <div class="treemap-cell-val">${fmtBudget(r.budget)}</div>
+      <div class="treemap-cell-pct">${pct(r.budget,total)}</div>`;
+    container.appendChild(cell);
+  });
+}
+
+function squarify(items, x, y, w, h){
+  if(!items.length)return[];
+  if(items.length===1){
+    return[{...items[0],x,y,w,h}];
+  }
+
+  // 짧은 쪽 기준으로 분할
+  const totalArea=items.reduce((s,r)=>s+r.area,0);
+  const shortSide=Math.min(w,h);
+  const horizontal=w>=h;
+
+  // 최적 row 탐색 (worst ratio 최소화)
+  let rowItems=[];
+  let best=Infinity;
+  for(let i=0;i<items.length;i++){
+    rowItems.push(items[i]);
+    const rowArea=rowItems.reduce((s,r)=>s+r.area,0);
+    const rowLen=rowArea/shortSide;
+    const worst=Math.max(...rowItems.map(r=>{
+      const rw=horizontal?rowLen:r.area/rowLen;
+      const rh=horizontal?r.area/rowLen:rowLen;
+      return Math.max(rw/rh,rh/rw);
+    }));
+    if(worst>best){rowItems.pop();break;}
+    best=worst;
+  }
+
+  // row 배치
+  const rowArea=rowItems.reduce((s,r)=>s+r.area,0);
+  const rowLen=rowArea/shortSide;
+  const result=[];
+  let pos=horizontal?y:x;
+  rowItems.forEach(item=>{
+    const span=item.area/rowLen;
+    if(horizontal){
+      result.push({...item,x,y:pos,w:rowLen,h:span});
+      pos+=span;
+    }else{
+      result.push({...item,x:pos,y,w:span,h:rowLen});
+      pos+=span;
+    }
+  });
+
+  // 나머지 재귀
+  const rest=items.slice(rowItems.length);
+  if(rest.length){
+    const nx=horizontal?x+rowLen:x;
+    const ny=horizontal?y:y+rowLen;
+    const nw=horizontal?w-rowLen:w;
+    const nh=horizontal?h:h-rowLen;
+    result.push(...squarify(rest,nx,ny,nw,nh));
+  }
+  return result;
+}
+
+// ══════════════════════════════════════════
 //  ② 10대 핵심투자분야
 // ══════════════════════════════════════════
 function renderCore10(){
@@ -733,12 +841,8 @@ function renderCore10(){
       scales:{x:{ticks:{color:'#334155',font:{size:12,weight:'600'}},grid:GRID},
               y:{ticks:{color:TC,font:{size:11},callback:barY},grid:GRID}}}});
 
-  // 도넛
-  mkChart('core10-donut-chart',{type:'doughnut',
-    data:{labels:c10data.map(c=>c.label),datasets:[{data:c10data.map(c=>c.budget),backgroundColor:CORE10.map(c=>c.color),borderColor:'#fff',borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'right',labels:{color:'#334155',font:{size:11},padding:8,boxWidth:12}},
-      tooltip:{callbacks:{label:c=>`${c.label}: ${fmtBudget(c.raw)} (${pct(c.raw,total)})`}}}}});
+  // 트리맵 (Squarified Treemap 알고리즘)
+  renderTreemap('core10-treemap', c10data, total);
 
   // 부처별 top10 (핵심분야 누적)
   const mMap={};filtered.forEach(r=>{if(!mMap[r.ministry])mMap[r.ministry]=0;mMap[r.ministry]+=r.budget;});
