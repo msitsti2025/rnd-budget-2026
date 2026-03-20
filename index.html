@@ -284,8 +284,8 @@ tr:hover td{background:#f8fbff}
         <div style="font-size:12px;font-weight:600;color:#6d28d9;margin-bottom:4px">💡 10대 핵심투자분야란?</div>
         <div style="font-size:11px;color:var(--text3);line-height:1.7">
           12대 국가전략기술과 8대 정책분야를 재편한 새로운 분류체계입니다.
-          <b style="color:#7c3aed">전략기술</b>은 12대 전략기술에 해당하는 세부사업의 총 예산을 집계하며(중복 방지),
-          <b style="color:#7c3aed">에너지</b>는 수소·차세대원자력·이차전지·탄소중립의 합산 금액입니다.
+          <b style="color:#7c3aed">전략기술</b>은 I~T열(12대 전략기술) 배정액 합계와 H열(세부사업 예산) 중 작은 값을 사용하며(중복 방지),
+          <b style="color:#7c3aed">에너지</b>는 정책분야 탄소중립 예산과 동일합니다.
           나머지 분야는 해당 정책분야 또는 전략기술 예산과 동일합니다.
         </div>
       </div>
@@ -489,11 +489,11 @@ const CORE10 = [
     def:'국가전략기술 인공지능',
     calc: r => r.strategic['인공지능']||0 },
   { key:'에너지',    label:'에너지',    color:'#f59e0b',
-    def:'전략기술 수소+차세대원자력+이차전지 + 정책분야 탄소중립',
-    calc: r => (r.strategic['수소']||0)+(r.strategic['차세대원자력']||0)+(r.strategic['이차전지']||0)+(r.policy['탄소중립']||0) },
+    def:'정책분야 탄소중립',
+    calc: r => r.policy['탄소중립']||0 },
   { key:'전략기술',  label:'전략기술',  color:'#7c3aed',
-    def:'12대 전략기술 해당 세부사업의 총 예산 (H열, 중복 방지)',
-    calc: r => ST_NAMES.some(n=>(r.strategic[n]||0)>0) ? r.budget : 0 },
+    def:'12대 전략기술 배정액(I~T열) 합계와 세부사업 예산(H열) 중 작은 값 사용 (중복 방지)',
+    calc: r => { const s=ST_NAMES.reduce((a,n)=>a+(r.strategic[n]||0),0); return s>0?Math.min(s,r.budget):0; } },
   { key:'방산',      label:'방산',      color:'#374151',
     def:'정책분야 국방',
     calc: r => r.policy['국방']||0 },
