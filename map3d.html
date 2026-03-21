@@ -107,32 +107,21 @@ canvas{display:block}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ── 원색 팔레트 (분야마다 확실히 다른 색) ──
-const ST_COLORS = {
-  '인공지능':        '#e63946',  // 빨강
-  '첨단바이오':      '#2a9d8f',  // 청록
-  '양자':            '#7b2d8b',  // 자주
-  '우주항공해양':    '#f4a261',  // 주황
-  '반도체/디스플레이':'#1d3557',  // 진남색
-  '첨단모빌리티':    '#06d6a0',  // 민트
-  '첨단로봇제조':    '#ef476f',  // 핫핑크
-  '차세대통신':      '#118ab2',  // 파랑
-  '수소':            '#ffd166',  // 노랑
-  '차세대원자력':    '#073b4c',  // 다크네이비
-  '이차전지':        '#8ecae6',  // 하늘
-  '사이버보안':      '#b5179e',  // 마젠타
-};
-const PF_COLORS = {
-  '기초':       '#457b9d',  // 청회색
-  '탄소중립':   '#2d6a4f',  // 진초록
-  '국방':       '#4a4e69',  // 보라회색
-  '출연직할':   '#9c6b00',  // 황갈색
-  '재난안전':   '#c1121f',  // 진빨강
-  '지역':       '#588157',  // 올리브그린
-  '기술사업화': '#e07a5f',  // 연주황
-  '인력양성':   '#3d405b',  // 슬레이트
-};
+// ── 색상: 인덱스 기반 (한글 키 의존성 제거) ──
+const ST_NAME_LIST = ['인공지능','첨단바이오','양자','우주항공해양','반도체/디스플레이','첨단모빌리티','첨단로봇제조','차세대통신','수소','차세대원자력','이차전지','사이버보안'];
+const ST_COLOR_LIST = ['#e63946','#2a9d8f','#7b2d8b','#f4a261','#1d3557','#06d6a0','#ef476f','#118ab2','#ffd166','#073b4c','#8ecae6','#b5179e'];
+const PF_NAME_LIST  = ['기초','탄소중립','국방','출연직할','재난안전','지역','기술사업화','인력양성'];
+const PF_COLOR_LIST = ['#457b9d','#2d6a4f','#4a4e69','#9c6b00','#c1121f','#588157','#e07a5f','#3d405b'];
 const NONE_COLOR = '#94a3b8';
+
+// 이름 → 색상 함수 (indexOf 사용)
+function stColor(name){ const i=ST_NAME_LIST.indexOf(name); return i>=0?ST_COLOR_LIST[i]:NONE_COLOR; }
+function pfColor(name){ const i=PF_NAME_LIST.indexOf(name);  return i>=0?PF_COLOR_LIST[i]:NONE_COLOR; }
+function domainColor(b){
+  if(b.st_domains&&b.st_domains.length>0) return stColor(b.st_domains[0]);
+  if(b.pf_domains&&b.pf_domains.length>0) return pfColor(b.pf_domains[0]);
+  return NONE_COLOR;
+}
 
 let scene, camera, renderer;
 let buildingMeshes=[], labelObjs=[], pfObjs=[], noneObjs=[];
@@ -234,13 +223,13 @@ function setupGround(D){
   // ── 12대 전략기술 아메바 ──
   D.st_names.forEach(n=>{
     const pts = D.st_amoeba[n];
-    makeAmoeba(pts, ST_COLORS[n]||'#64748b', 0.14, 0.70, 0.5, null);
+    makeAmoeba(pts, stColor(n)||'#64748b', 0.14, 0.70, 0.5, null);
   });
 
   // ── 8대 정책분야 아메바 ──
   D.pf_names.forEach(n=>{
     const pts = D.pf_amoeba[n];
-    makeAmoeba(pts, PF_COLORS[n]||'#64748b', 0.11, 0.60, 0.5, pfObjs);
+    makeAmoeba(pts, pfColor(n)||'#64748b', 0.11, 0.60, 0.5, pfObjs);
   });
 }
 
@@ -253,12 +242,12 @@ async function buildCity(buildings, stC, pfC){
   }
   // ST 라벨
   Object.entries(stC).forEach(([n,[cx,cy]])=>{
-    const sp=makeSprite(n, ST_COLORS[n]||'#334155', 46);
+    const sp=makeSprite(n, stColor(n)||'#334155', 46);
     sp.position.set(cx,14,cy); labelObjs.push(sp); scene.add(sp);
   });
   // PF 라벨
   Object.entries(pfC).forEach(([n,[cx,cy]])=>{
-    const sp=makeSprite(n, PF_COLORS[n]||'#475569', 38);
+    const sp=makeSprite(n, pfColor(n)||'#475569', 38);
     sp.position.set(cx,14,cy); labelObjs.push(sp); pfObjs.push(sp); scene.add(sp);
   });
   // 미분류 라벨
@@ -273,8 +262,8 @@ function createBuilding(b){
   group.userData=b;
 
   let baseHex = NONE_COLOR;
-  if(b.st_domains&&b.st_domains.length>0) baseHex=ST_COLORS[b.st_domains[0]]||NONE_COLOR;
-  else if(b.pf_domains&&b.pf_domains.length>0) baseHex=PF_COLORS[b.pf_domains[0]]||NONE_COLOR;
+  if(b.st_domains&&b.st_domains.length>0) baseHex=stColor(b.st_domains[0)]||NONE_COLOR;
+  else if(b.pf_domains&&b.pf_domains.length>0) baseHex=pfColor(b.pf_domains[0)]||NONE_COLOR;
 
   const bw=b.bw, bh=b.bh;
   const blocks=b.blocks;
@@ -337,13 +326,13 @@ function setupLegend(D){
   const stEl=document.getElementById('leg-st');
   D.st_names.forEach(n=>{
     const d=document.createElement('div'); d.className='leg-item';
-    d.innerHTML=`<div class="leg-dot" style="background:${ST_COLORS[n]}"></div><div class="leg-label">${n}</div><div class="leg-cnt">${stC[n]||0}</div>`;
+    d.innerHTML=`<div class="leg-dot" style="background:${stColor(n)}"></div><div class="leg-label">${n}</div><div class="leg-cnt">${stC[n]||0}</div>`;
     stEl.appendChild(d);
   });
   const pfEl=document.getElementById('leg-pf');
   D.pf_names.forEach(n=>{
     const d=document.createElement('div'); d.className='leg-item';
-    d.innerHTML=`<div class="leg-dot" style="background:${PF_COLORS[n]}"></div><div class="leg-label">${n}</div><div class="leg-cnt">${pfC[n]||0}</div>`;
+    d.innerHTML=`<div class="leg-dot" style="background:${pfColor(n)}"></div><div class="leg-label">${n}</div><div class="leg-cnt">${pfC[n]||0}</div>`;
     pfEl.appendChild(d);
   });
   document.getElementById('leg-nc').textContent=noneC;
@@ -423,8 +412,8 @@ function handleHover(e){
       if(hovered) highlight(hovered,false);
       hovered=b.id; highlight(b.id,true);
     }
-    const stT=(b.st_domains||[]).map(d=>`<span class="tt-tag" style="background:${ST_COLORS[d]}22;color:${ST_COLORS[d]};border:1px solid ${ST_COLORS[d]}66">${d}</span>`).join('');
-    const pfT=(b.pf_domains||[]).map(d=>`<span class="tt-tag" style="background:${PF_COLORS[d]}22;color:${PF_COLORS[d]};border:1px solid ${PF_COLORS[d]}66">${d}</span>`).join('');
+    const stT=(b.st_domains||[]).map(d=>`<span class="tt-tag" style="background:${stColor(d)}22;color:${stColor(d)};border:1px solid ${stColor(d)}66">${d}</span>`).join('');
+    const pfT=(b.pf_domains||[]).map(d=>`<span class="tt-tag" style="background:${pfColor(d)}22;color:${pfColor(d)};border:1px solid ${pfColor(d)}66">${d}</span>`).join('');
     const bls=b.blocks.slice(0,4).map(bl=>`<div class="tt-br"><span class="tt-bn">${bl.name}</span><span class="tt-bv">${fmtB(bl.budget)}</span></div>`).join('');
     const more=b.blocks.length-4;
     document.getElementById('tt-in').innerHTML=
@@ -465,9 +454,9 @@ function highlight(id,on){
 function showPanel(b){
   document.getElementById('pn-title').textContent=b.name;
   const maxBl=Math.max(...b.blocks.map(bl=>bl.budget));
-  const stT=(b.st_domains||[]).map(d=>`<span class="pn-tag" style="background:${ST_COLORS[d]}20;color:${ST_COLORS[d]};border:1px solid ${ST_COLORS[d]}55">${d}</span>`).join('');
-  const pfT=(b.pf_domains||[]).map(d=>`<span class="pn-tag" style="background:${PF_COLORS[d]}20;color:${PF_COLORS[d]};border:1px solid ${PF_COLORS[d]}55">${d}</span>`).join('');
-  const baseHex=b.st_domains&&b.st_domains.length>0?ST_COLORS[b.st_domains[0]]:b.pf_domains&&b.pf_domains.length>0?PF_COLORS[b.pf_domains[0]]:NONE_COLOR;
+  const stT=(b.st_domains||[]).map(d=>`<span class="pn-tag" style="background:${stColor(d)}20;color:${stColor(d)};border:1px solid ${stColor(d)}55">${d}</span>`).join('');
+  const pfT=(b.pf_domains||[]).map(d=>`<span class="pn-tag" style="background:${pfColor(d)}20;color:${pfColor(d)};border:1px solid ${pfColor(d)}55">${d}</span>`).join('');
+  const baseHex=b.st_domains&&b.st_domains.length>0?stColor(b.st_domains[0)]:b.pf_domains&&b.pf_domains.length>0?pfColor(b.pf_domains[0)]:NONE_COLOR;
   const bls=b.blocks.map((bl,i)=>{
     const t=b.blocks.length<=1?0:i/(b.blocks.length-1);
     const col=new THREE.Color(baseHex); col.lerp(new THREE.Color(0xffffff),0.30*t);
