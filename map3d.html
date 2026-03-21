@@ -167,7 +167,7 @@ function setupGround(D){
   // 지면
   const gm=new THREE.Mesh(new THREE.PlaneGeometry(3200,3200),new THREE.MeshLambertMaterial({color:0x070c15}));
   gm.rotation.x=-Math.PI/2;gm.receiveShadow=true;scene.add(gm);
-  scene.add(Object.assign(new THREE.GridHelper(3200,110,0x111827,0x111827),{position:{x:0,y:0.2,z:0}}));
+  const gh=new THREE.GridHelper(3200,110,0x111827,0x111827);gh.position.y=0.2;scene.add(gh);
 
   const R_ST=D.R_ST; // 260
   const PETAL=118;   // 전략기술 원 반지름
