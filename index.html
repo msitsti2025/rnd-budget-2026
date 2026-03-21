@@ -217,9 +217,9 @@ tr:hover td{background:#f8fbff}
     <button class="tab-btn core10 active" onclick="switchTab('core10')">🎯 10대 핵심투자분야</button>
     <button class="tab-btn"              onclick="switchTab('strategic')">🔬 국가전략기술</button>
     <button class="tab-btn"              onclick="switchTab('policy')">📋 정책분야</button>
+    <button class="tab-btn"              onclick="switchTab('unclassified')" style="color:#64748b">📂 기타 사업</button>
     <button class="tab-btn"              onclick="switchTab('ministry')">🏛 부처별 현황</button>
     <button class="tab-btn"              onclick="switchTab('list')">📄 세부·내역사업 목록</button>
-    <button class="tab-btn"              onclick="switchTab('unclassified')" style="color:#64748b">⬜ 미분류 사업</button>
     <button class="tab-btn" style="color:#f59e0b;margin-left:auto" onclick="window.open('map3d.html','_blank')">🏙 3D 맵 ↗</button>
   </div>
 </div>
@@ -424,16 +424,16 @@ tr:hover td{background:#f8fbff}
       </div>
     </div>
 
-    <!-- ⑥ 미분류 사업 -->
+    <!-- ⑥ 기타 사업 -->
     <div class="tab-panel" id="panel-unclassified">
       <div class="kpi-row">
         <div class="kpi-card blue">
-          <div class="kpi-label">미분류 세부사업</div>
+          <div class="kpi-label">기타 세부사업</div>
           <div class="kpi-value" id="unc-k-sub">-<span class="kpi-unit">개</span></div>
           <div class="kpi-sub" id="unc-k-sub-pct"></div>
         </div>
         <div class="kpi-card yellow">
-          <div class="kpi-label">미분류 예산 합계</div>
+          <div class="kpi-label">기타 사업 예산 합계</div>
           <div class="kpi-value" id="unc-k-budget">-<span class="kpi-unit">조원</span></div>
           <div class="kpi-sub" id="unc-k-budget-pct"></div>
         </div>
@@ -450,7 +450,7 @@ tr:hover td{background:#f8fbff}
       </div>
       <div class="charts-grid">
         <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#64748b"></div>전문위별 미분류 예산</div>
+          <div class="chart-title"><div class="chart-title-dot" style="background:#64748b"></div>전문위별 기타 사업 예산</div>
           <div class="chart-wrap"><canvas id="unc-com-chart"></canvas></div>
         </div>
         <div class="chart-card">
@@ -460,7 +460,7 @@ tr:hover td{background:#f8fbff}
       </div>
       <div class="table-card">
         <div class="table-header">
-          <div class="table-title">미분류 세부사업 목록 (전문위별 분류)</div>
+          <div class="table-title">기타 세부사업 목록 (전문위별 분류)</div>
           <div class="table-meta"><span class="badge badge-gray" id="unc-table-count"></span></div>
         </div>
         <div class="table-wrap">
@@ -564,7 +564,7 @@ function initUI(){
 // ══════════════════════════════════════════
 //  탭 전환
 // ══════════════════════════════════════════
-const TAB_IDS=['core10','strategic','policy','ministry','list','unclassified'];
+const TAB_IDS=['core10','strategic','policy','unclassified','ministry','list'];
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',TAB_IDS[i]===tab));
@@ -652,7 +652,13 @@ function renderCurrentTab(){
 // ══════════════════════════════════════════
 //  유틸
 // ══════════════════════════════════════════
-function fmtBudget(v){return v>=1000000?(v/1000000).toFixed(2)+'조':(v>=100000?(v/10000).toFixed(0)+'억':(v/100).toFixed(0)+'억');}
+function fmtBudget(v){
+  if(v>=1000000) return (v/1000000).toFixed(2)+'조원';
+  if(v>=100000)  return (v/100000).toFixed(1)+'천억원';
+  if(v>=10000)   return (v/100).toFixed(0)+'억원';
+  if(v>=100)     return (v/100).toFixed(1)+'억원';
+  return Math.round(v).toLocaleString()+'백만원';
+}
 function fmtM(v){return Math.round(v).toLocaleString();}
 function pct(a,b){return b?((a/b)*100).toFixed(1)+'%':'0%';}
 function mkChart(id,cfg){
@@ -1073,7 +1079,7 @@ function goListPage(p){
 }
 
 // ══════════════════════════════════════════
-//  ⑥ 미분류 사업
+//  ⑥ 기타 사업
 // ══════════════════════════════════════════
 const UNC_PAGE=20;
 let uncPage=1, uncSortKey='committee', uncSortDir=1;
