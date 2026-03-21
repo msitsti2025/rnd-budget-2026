@@ -3,68 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>한 눈에 보는 2026년 정부 R&D 예산 — 3D 전략기술 맵</title>
+<title>2026년 정부 R&D 예산 - 3D 맵</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans KR',sans-serif;background:#e4eaf3;overflow:hidden;width:100vw;height:100vh}
-#loading{position:fixed;inset:0;background:#e4eaf3;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
-.spinner{width:44px;height:44px;border:3px solid #c8d4e8;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite}
+body{font-family:'Noto Sans KR',sans-serif;background:#0a0e1a;overflow:hidden;width:100vw;height:100vh}
+#loading{position:fixed;inset:0;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
+.spinner{width:44px;height:44px;border:3px solid #1e293b;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.load-text{color:#64748b;font-size:14px}
+.load-text{color:#475569;font-size:14px}
 #canvas-wrap{position:fixed;inset:0}
 canvas{display:block}
-#topbar{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid #dde5f0;display:flex;align-items:center;padding:0 18px;gap:14px;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+#topbar{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1e293b;display:flex;align-items:center;padding:0 18px;gap:14px;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.4)}
 .tb-icon{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.tb-title{font-size:14px;font-weight:700;color:#0f172a}
-.tb-sub{font-size:10px;color:#64748b;margin-top:2px}
-.tb-div{width:1px;height:28px;background:#e2e8f0;margin:0 2px;flex-shrink:0}
+.tb-title{font-size:14px;font-weight:700;color:#e2e8f0}
+.tb-sub{font-size:10px;color:#475569;margin-top:2px}
+.tb-div{width:1px;height:28px;background:#1e293b;margin:0 2px;flex-shrink:0}
 .tb-stat{text-align:center;flex-shrink:0}
-.tb-sv{font-size:15px;font-weight:700;color:#2563eb}
-.tb-sl{font-size:10px;color:#64748b}
+.tb-sv{font-size:15px;font-weight:700;color:#60a5fa}
+.tb-sl{font-size:10px;color:#475569}
 .tb-sp{flex:1}
-.tbtn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #cbd5e1;color:#475569;background:#fff;font-family:inherit;transition:all .15s;white-space:nowrap}
-.tbtn:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
-.tbtn.on{background:#eff6ff;border-color:#2563eb;color:#2563eb}
-#legend{position:fixed;left:14px;top:62px;background:rgba(255,255,255,.96);border:1px solid #dde5f0;border-radius:11px;padding:13px;width:192px;z-index:100;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.leg-sec{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;margin-top:9px}
+.tbtn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #334155;color:#94a3b8;background:transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
+.tbtn:hover{border-color:#60a5fa;color:#60a5fa;background:rgba(96,165,250,.08)}
+.tbtn.on{background:rgba(96,165,250,.12);border-color:#60a5fa;color:#60a5fa}
+#legend{position:fixed;left:14px;top:62px;background:rgba(15,23,42,.90);backdrop-filter:blur(10px);border:1px solid #1e293b;border-radius:11px;padding:13px;width:192px;z-index:100;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.leg-sec{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;margin-top:9px}
 .leg-sec:first-child{margin-top:0}
 .leg-item{display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:2px 4px}
 .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.leg-label{font-size:11px;color:#334155;flex:1;line-height:1.3}
-.leg-cnt{font-size:10px;color:#94a3b8;flex-shrink:0}
-.leg-sep{height:1px;background:#f1f5f9;margin:7px 0}
+.leg-label{font-size:11px;color:#94a3b8;flex:1;line-height:1.3}
+.leg-cnt{font-size:10px;color:#475569;flex-shrink:0}
+.leg-sep{height:1px;background:#1e293b;margin:7px 0}
 .scale-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .scale-box{border-radius:2px;flex-shrink:0}
-.scale-text{font-size:10px;color:#64748b}
+.scale-text{font-size:10px;color:#475569}
 #tooltip{position:fixed;pointer-events:none;z-index:200;display:none;max-width:300px}
-.tt{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:13px;box-shadow:0 6px 24px rgba(0,0,0,.13)}
-.tt-name{font-size:12px;font-weight:700;color:#0f172a;margin-bottom:7px;line-height:1.4}
+.tt{background:rgba(15,23,42,.97);border:1px solid #334155;border-radius:10px;padding:13px;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.tt-name{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:7px;line-height:1.4}
 .tt-row{display:flex;justify-content:space-between;margin-bottom:3px;gap:10px}
-.tt-k{font-size:10px;color:#64748b}.tt-v{font-size:10px;font-weight:600;color:#334155}.tt-hi{color:#2563eb}
+.tt-k{font-size:10px;color:#475569}.tt-v{font-size:10px;font-weight:600;color:#94a3b8}.tt-hi{color:#60a5fa}
 .tt-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
 .tt-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600;border:1px solid}
-.tt-blocks{margin-top:7px;border-top:1px solid #f1f5f9;padding-top:7px}
-.tt-bt{font-size:10px;color:#94a3b8;margin-bottom:4px}
+.tt-blocks{margin-top:7px;border-top:1px solid #1e293b;padding-top:7px}
+.tt-bt{font-size:10px;color:#475569;margin-bottom:4px}
 .tt-br{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;gap:8px}
-.tt-bn{color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.tt-bv{color:#2563eb;font-weight:600;flex-shrink:0}
-#panel{position:fixed;right:14px;top:62px;width:268px;background:rgba(255,255,255,.97);border:1px solid #e2e8f0;border-radius:11px;padding:15px;z-index:100;display:none;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.10)}
-.pn-close{float:right;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:15px}
-.pn-close:hover{color:#475569}
-.pn-title{font-size:12px;font-weight:700;color:#0f172a;margin-bottom:9px;padding-right:20px;line-height:1.4}
+.tt-bn{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.tt-bv{color:#60a5fa;font-weight:600;flex-shrink:0}
+#panel{position:fixed;right:14px;top:62px;width:268px;background:rgba(15,23,42,.95);backdrop-filter:blur(10px);border:1px solid #334155;border-radius:11px;padding:15px;z-index:100;display:none;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.pn-close{float:right;background:none;border:none;color:#475569;cursor:pointer;font-size:15px}
+.pn-close:hover{color:#94a3b8}
+.pn-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:9px;padding-right:20px;line-height:1.4}
 .pn-row{display:flex;justify-content:space-between;margin-bottom:5px}
-.pn-k{font-size:10px;color:#64748b}.pn-v{font-size:10px;font-weight:600;color:#334155}
+.pn-k{font-size:10px;color:#475569}.pn-v{font-size:10px;font-weight:600;color:#94a3b8}
 .pn-tags{display:flex;flex-wrap:wrap;gap:3px;margin:7px 0}
 .pn-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;border:1px solid}
-.pn-bsec{margin-top:9px;border-top:1px solid #f1f5f9;padding-top:9px}
-.pn-bsec-t{font-size:10px;color:#94a3b8;margin-bottom:6px}
+.pn-bsec{margin-top:9px;border-top:1px solid #1e293b;padding-top:9px}
+.pn-bsec-t{font-size:10px;color:#475569;margin-bottom:6px}
 .pn-brow{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-.pn-bname{font-size:10px;color:#475569;min-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pn-bwrap{flex:1;height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden}
+.pn-bname{font-size:10px;color:#94a3b8;min-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pn-bwrap{flex:1;height:5px;background:#1e293b;border-radius:3px;overflow:hidden}
 .pn-bbar{height:100%;border-radius:3px}
-.pn-bval{font-size:10px;color:#2563eb;font-weight:600;white-space:nowrap}
-#hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.90);border:1px solid #dde5f0;border-radius:20px;padding:6px 16px;font-size:11px;color:#64748b;z-index:100;white-space:nowrap;pointer-events:none}
+.pn-bval{font-size:10px;color:#60a5fa;font-weight:600;white-space:nowrap}
+#hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.85);border:1px solid #1e293b;border-radius:20px;padding:6px 16px;font-size:11px;color:#475569;z-index:100;white-space:nowrap;pointer-events:none}
 </style>
 </head>
 <body>
@@ -72,7 +72,7 @@ canvas{display:block}
 <div id="topbar">
   <div class="tb-icon">🔬</div>
   <div>
-    <div class="tb-title">2026년 정부 R&D 예산 — 3D 전략기술 맵</div>
+    <div class="tb-title">2026년 정부 R&D 예산 - 3D 맵</div>
     <div class="tb-sub">내부: 12대 국가전략기술 &nbsp;|&nbsp; 외부: 8대 정책분야 &nbsp;|&nbsp; 아메바 영역 = 빌딩 분포 &nbsp;|&nbsp; 빌딩 부피 ∝ 예산 &nbsp;|&nbsp; 과학기술혁신본부</div>
   </div>
   <div class="tb-div"></div>
@@ -166,14 +166,14 @@ function showErr(msg){
     '<div style="color:#dc2626;text-align:center;padding:40px">'+
     '<div style="font-size:36px">&#9888;</div>'+
     '<div style="color:#0f172a;margin-top:10px;font-size:14px">'+msg+'</div>'+
-    '<div style="color:#64748b;font-size:12px;margin-top:6px">map3d.html 과 map3d.json 을 같은 폴더에 두세요</div>'+
+    '<div style="color:#64748b;font-size:12px;margin-top:6px">map3d.html 과 map3d.json 을 같은 폴더에 두세요</div>'
     '</div>';
 }
 
 function setupScene(){
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0xd2dae7);
-  scene.fog=new THREE.Fog(0xd2dae7,1800,3400);
+  scene.background=new THREE.Color(0x0a0e1a);
+  scene.fog=new THREE.Fog(0x0a0e1a,1800,3400);
   camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,1,6000);
   renderer=new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(innerWidth,innerHeight);
@@ -190,15 +190,15 @@ function setupScene(){
 }
 
 function setupLights(){
-  scene.add(new THREE.AmbientLight(0xcdd8ea,2.6));
-  const sun=new THREE.DirectionalLight(0xffffff,1.8);
+  scene.add(new THREE.AmbientLight(0x1e3050,2.8));
+  const sun=new THREE.DirectionalLight(0xffffff,1.6);
   sun.position.set(700,1000,500); sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
   sun.shadow.camera.left=-1400; sun.shadow.camera.right=1400;
   sun.shadow.camera.top=1400;   sun.shadow.camera.bottom=-1400;
   sun.shadow.camera.far=3200;
   scene.add(sun);
-  const fill=new THREE.DirectionalLight(0xbfd4f0,0.65);
+  const fill=new THREE.DirectionalLight(0x3b5a8a,0.7);
   fill.position.set(-400,500,-300);
   scene.add(fill);
 }
@@ -228,18 +228,18 @@ function makeAmoeba(pts, colorHex, fillOp, lineOp, yBase, objs){
 
 function setupGround(D){
   const gm=new THREE.Mesh(new THREE.PlaneGeometry(3800,3800),
-    new THREE.MeshLambertMaterial({color:0xc4d0de}));
+    new THREE.MeshLambertMaterial({color:0x080d18}));
   gm.rotation.x=-Math.PI/2; gm.receiveShadow=true; scene.add(gm);
-  const gh=new THREE.GridHelper(3800,150,0xaebccc,0xaebccc);
+  const gh=new THREE.GridHelper(3800,150,0x131d2e,0x131d2e);
   gh.position.y=0.2; scene.add(gh);
 
   // ST 아메바 (인덱스 순서)
   ST_NAMES.forEach((n,i)=>{
-    makeAmoeba(D.st_amoeba[i], ST_COLORS[i], 0.14, 0.72, 0.5, null);
+    makeAmoeba(D.st_amoeba[i], ST_COLORS[i], 0.18, 0.80, 0.5, null);
   });
   // PF 아메바
   PF_NAMES.forEach((n,i)=>{
-    makeAmoeba(D.pf_amoeba[i], PF_COLORS[i], 0.11, 0.62, 0.5, pfObjs);
+    makeAmoeba(D.pf_amoeba[i], PF_COLORS[i], 0.14, 0.68, 0.5, pfObjs);
   });
 }
 

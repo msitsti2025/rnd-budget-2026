@@ -216,6 +216,7 @@ tr:hover td{background:#f8fbff}
     <button class="tab-btn"         onclick="switchTab('policy')">📋 정책분야</button>
     <button class="tab-btn"         onclick="switchTab('ministry')">🏛 부처별 현황</button>
     <button class="tab-btn"         onclick="switchTab('list')">📄 세부·내역사업 목록</button>
+    <button class="tab-btn"         onclick="switchTab('map3d')" style="color:#f59e0b">🏙 3D 맵</button>
   </div>
 </div>
 
@@ -485,6 +486,18 @@ tr:hover td{background:#f8fbff}
       </div>
     </div>
 
+    <!-- ⑦ 3D 맵 -->
+    <div class="tab-panel" id="panel-map3d" style="gap:0">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">2026년 정부 R&D 예산 - 3D 맵</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">12대 국가전략기술 × 8대 정책분야 아메바 영역 · 빌딩 부피 ∝ 예산 · 내역사업 = 블록 · 과학기술혁신본부</div>
+        </div>
+        <a href="map3d.html" target="_blank" style="padding:7px 16px;background:var(--accent2);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;flex-shrink:0;margin-left:16px">새 창으로 열기 ↗</a>
+      </div>
+      <iframe id="map3d-frame" src="" style="width:100%;height:calc(100vh - 180px);border:1px solid var(--border);border-radius:var(--radius);background:#0a0e1a;display:block" loading="lazy"></iframe>
+    </div>
+
   </main>
 </div>
 
@@ -568,12 +581,17 @@ function initUI(){
 // ══════════════════════════════════════════
 //  탭 전환
 // ══════════════════════════════════════════
-const TAB_IDS=['overview','core10','strategic','policy','ministry','list'];
+const TAB_IDS=['overview','core10','strategic','policy','ministry','list','map3d'];
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',TAB_IDS[i]===tab));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+tab).classList.add('active');
+  // 3D 맵 탭: iframe을 처음 열 때만 src 설정 (lazy load)
+  if(tab==='map3d'){
+    const fr=document.getElementById('map3d-frame');
+    if(!fr.src||fr.src==='about:blank'||fr.src==='') fr.src='map3d.html';
+  }
   renderCurrentTab();
 }
 
