@@ -3,703 +3,372 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>한 눈에 보는 2026년 정부 R&D 예산 — 3D 맵</title>
+<title>한 눈에 보는 2026년 정부 R&D 예산 — 3D 전략기술 맵</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',sans-serif;background:#0b0f1a;overflow:hidden;width:100vw;height:100vh}
-
-/* ── 로딩 ── */
-#loading{position:fixed;inset:0;background:#0b0f1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+#loading{position:fixed;inset:0;background:#0b0f1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
 .spinner{width:48px;height:48px;border:3px solid #1e293b;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .load-text{color:#64748b;font-size:14px}
-.load-sub{color:#334155;font-size:12px}
-
-/* ── Three.js 캔버스 ── */
 #canvas-wrap{position:fixed;inset:0}
 canvas{display:block}
-
-/* ── 상단 헤더 ── */
-#topbar{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(11,15,26,.88);backdrop-filter:blur(12px);border-bottom:1px solid #1e293b;display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100}
-.tb-logo{display:flex;align-items:center;gap:10px}
-.tb-icon{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.tb-title{font-size:15px;font-weight:700;color:#e2e8f0}
-.tb-sub{font-size:11px;color:#475569;margin-top:1px}
-.tb-divider{width:1px;height:30px;background:#1e293b;margin:0 4px}
-.tb-stat{text-align:center}
-.tb-stat-val{font-size:16px;font-weight:700;color:#60a5fa}
+#topbar{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(11,15,26,.9);backdrop-filter:blur(12px);border-bottom:1px solid #1e293b;display:flex;align-items:center;padding:0 18px;gap:14px;z-index:100}
+.tb-icon{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tb-title{font-size:14px;font-weight:700;color:#e2e8f0}
+.tb-sub{font-size:10px;color:#475569;margin-top:2px}
+.tb-div{width:1px;height:28px;background:#1e293b;margin:0 2px;flex-shrink:0}
+.tb-stat{text-align:center;flex-shrink:0}
+.tb-stat-val{font-size:15px;font-weight:700;color:#60a5fa}
 .tb-stat-label{font-size:10px;color:#475569}
-.tb-spacer{flex:1}
-.tb-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid;font-family:inherit;transition:all .2s}
-.tb-btn-ghost{background:transparent;border-color:#334155;color:#94a3b8}
-.tb-btn-ghost:hover{border-color:#3b82f6;color:#60a5fa}
-.tb-btn-primary{background:#2563eb;border-color:#2563eb;color:#fff}
-.tb-btn-primary:hover{background:#1d4ed8}
-
-/* ── 범례 패널 ── */
-#legend{position:fixed;left:16px;top:70px;background:rgba(11,15,26,.90);backdrop-filter:blur(10px);border:1px solid #1e293b;border-radius:12px;padding:14px;width:210px;z-index:100}
-.legend-title{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
-.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;padding:3px 6px;border-radius:6px;transition:background .15s}
-.legend-item:hover{background:rgba(255,255,255,.05)}
-.legend-item.dimmed{opacity:.35}
-.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.legend-label{font-size:11px;color:#94a3b8;flex:1}
-.legend-count{font-size:10px;color:#475569}
-.legend-sep{height:1px;background:#1e293b;margin:8px 0}
-.legend-scale{margin-top:2px}
-.legend-scale-title{font-size:10px;color:#475569;margin-bottom:6px}
-.scale-bars{display:flex;flex-direction:column;gap:4px}
-.scale-row{display:flex;align-items:center;gap:6px}
+.tb-sp{flex:1}
+.tbtn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #334155;color:#94a3b8;background:transparent;font-family:inherit;transition:all .2s;white-space:nowrap}
+.tbtn:hover{border-color:#3b82f6;color:#60a5fa}
+.tbtn.on{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa}
+#legend{position:fixed;left:14px;top:62px;background:rgba(11,15,26,.92);backdrop-filter:blur(10px);border:1px solid #1e293b;border-radius:11px;padding:13px;width:196px;z-index:100;max-height:calc(100vh - 80px);overflow-y:auto}
+.leg-sec{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;margin-top:10px}
+.leg-sec:first-child{margin-top:0}
+.leg-item{display:flex;align-items:center;gap:7px;margin-bottom:4px;padding:2px 5px;border-radius:5px}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.leg-label{font-size:11px;color:#94a3b8;flex:1;line-height:1.3}
+.leg-cnt{font-size:10px;color:#475569;flex-shrink:0}
+.leg-sep{height:1px;background:#1e293b;margin:8px 0}
+.scale-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .scale-block{background:#3b82f6;border-radius:2px;flex-shrink:0}
 .scale-text{font-size:10px;color:#64748b}
-
-/* ── 툴팁 ── */
-#tooltip{position:fixed;pointer-events:none;z-index:200;display:none;max-width:320px}
-.tt-inner{background:rgba(15,23,42,.96);border:1px solid #334155;border-radius:10px;padding:14px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
-.tt-name{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:8px;line-height:1.4}
-.tt-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:12px}
-.tt-key{font-size:11px;color:#64748b}
-.tt-val{font-size:11px;font-weight:600;color:#94a3b8}
-.tt-val.accent{color:#60a5fa}
-.tt-domains{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
-.tt-domain{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600}
-.tt-blocks{margin-top:8px;border-top:1px solid #1e293b;padding-top:8px}
-.tt-block-title{font-size:10px;color:#475569;margin-bottom:5px}
-.tt-block-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;gap:8px}
-.tt-block-name{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.tt-block-val{color:#60a5fa;font-weight:600;flex-shrink:0}
-
-/* ── 컨트롤 힌트 ── */
-#hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(11,15,26,.80);border:1px solid #1e293b;border-radius:20px;padding:7px 18px;font-size:11px;color:#475569;z-index:100;white-space:nowrap}
-
-/* ── 선택 패널 ── */
-#info-panel{position:fixed;right:16px;top:70px;width:280px;background:rgba(11,15,26,.92);backdrop-filter:blur(10px);border:1px solid #334155;border-radius:12px;padding:16px;z-index:100;display:none}
-.ip-close{float:right;background:none;border:none;color:#475569;cursor:pointer;font-size:16px;line-height:1}
-.ip-title{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px;padding-right:24px;line-height:1.4}
-.ip-row{display:flex;justify-content:space-between;margin-bottom:6px}
-.ip-key{font-size:11px;color:#64748b}
-.ip-val{font-size:11px;font-weight:600;color:#94a3b8}
-.ip-domains{display:flex;flex-wrap:wrap;gap:3px;margin:8px 0}
-.ip-blocks{margin-top:10px;border-top:1px solid #1e293b;padding-top:10px}
-.ip-blocks-title{font-size:11px;color:#475569;margin-bottom:6px}
-.ip-block{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.ip-block-bar-wrap{flex:1;height:6px;background:#1e293b;border-radius:3px;overflow:hidden}
-.ip-block-bar{height:100%;border-radius:3px}
-.ip-block-name{font-size:10px;color:#94a3b8;min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ip-block-val{font-size:10px;color:#60a5fa;font-weight:600;white-space:nowrap}
+#tooltip{position:fixed;pointer-events:none;z-index:200;display:none;max-width:300px}
+.tt{background:rgba(15,23,42,.97);border:1px solid #334155;border-radius:10px;padding:13px;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.tt-name{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:7px;line-height:1.4}
+.tt-row{display:flex;justify-content:space-between;margin-bottom:3px;gap:10px}
+.tt-k{font-size:10px;color:#64748b}
+.tt-v{font-size:10px;font-weight:600;color:#94a3b8}
+.tt-v.hi{color:#60a5fa}
+.tt-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.tt-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600}
+.tt-blocks{margin-top:7px;border-top:1px solid #1e293b;padding-top:7px}
+.tt-bt{font-size:10px;color:#475569;margin-bottom:4px}
+.tt-br{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;gap:8px}
+.tt-bn{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.tt-bv{color:#60a5fa;font-weight:600;flex-shrink:0}
+#panel{position:fixed;right:14px;top:62px;width:270px;background:rgba(11,15,26,.94);backdrop-filter:blur(10px);border:1px solid #334155;border-radius:11px;padding:15px;z-index:100;display:none;max-height:calc(100vh - 80px);overflow-y:auto}
+.pn-close{float:right;background:none;border:none;color:#475569;cursor:pointer;font-size:15px}
+.pn-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:9px;padding-right:20px;line-height:1.4}
+.pn-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.pn-k{font-size:10px;color:#64748b}
+.pn-v{font-size:10px;font-weight:600;color:#94a3b8}
+.pn-tags{display:flex;flex-wrap:wrap;gap:3px;margin:7px 0}
+.pn-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600}
+.pn-bsec{margin-top:9px;border-top:1px solid #1e293b;padding-top:9px}
+.pn-bsec-t{font-size:10px;color:#475569;margin-bottom:6px}
+.pn-brow{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.pn-bname{font-size:10px;color:#94a3b8;min-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pn-bwrap{flex:1;height:5px;background:#1e293b;border-radius:3px;overflow:hidden}
+.pn-bbar{height:100%;border-radius:3px}
+.pn-bval{font-size:10px;color:#60a5fa;font-weight:600;white-space:nowrap}
+#hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(11,15,26,.82);border:1px solid #1e293b;border-radius:20px;padding:6px 16px;font-size:11px;color:#475569;z-index:100;white-space:nowrap;pointer-events:none}
 </style>
 </head>
 <body>
-
-<div id="loading">
-  <div class="spinner"></div>
-  <div class="load-text">3D 맵 구성 중...</div>
-  <div class="load-sub" id="load-sub">데이터 로딩</div>
-</div>
-
-<!-- 헤더 -->
+<div id="loading"><div class="spinner"></div><div class="load-text" id="load-txt">데이터 로딩 중...</div></div>
 <div id="topbar">
-  <div class="tb-logo">
-    <div class="tb-icon">🏙</div>
-    <div>
-      <div class="tb-title">한 눈에 보는 2026년 정부 R&D 예산 — 3D 맵</div>
-      <div class="tb-sub">세부사업 = 빌딩 · 내역사업 = 블럭 · 높이 = 예산 규모 · 과학기술혁신본부</div>
-    </div>
-  </div>
-  <div class="tb-divider"></div>
-  <div class="tb-stat"><div class="tb-stat-val" id="st-budget">-</div><div class="tb-stat-label">총 예산 (조원)</div></div>
-  <div class="tb-stat"><div class="tb-stat-val" id="st-sub">-</div><div class="tb-stat-label">세부사업</div></div>
-  <div class="tb-stat"><div class="tb-stat-val" id="st-det">-</div><div class="tb-stat-label">내역사업</div></div>
-  <div class="tb-spacer"></div>
-  <button class="tb-btn tb-btn-ghost" onclick="resetCamera()">📷 초기 시점</button>
-  <button class="tb-btn tb-btn-ghost" onclick="toggleLabel()">🏷 라벨</button>
-  <button class="tb-btn tb-btn-ghost" id="btn-ground" onclick="toggleGround()">🗺 지면</button>
+  <div class="tb-icon">🔬</div>
+  <div><div class="tb-title">2026년 정부 R&D 예산 — 3D 전략기술 맵</div>
+    <div class="tb-sub">내부원: 12대 국가전략기술 &nbsp;|&nbsp; 외부원: 8대 정책분야 &nbsp;|&nbsp; 빌딩높이=예산 &nbsp;|&nbsp; 과학기술혁신본부</div></div>
+  <div class="tb-div"></div>
+  <div class="tb-stat"><div class="tb-stat-val" id="st-b">-</div><div class="tb-stat-label">총예산(조)</div></div>
+  <div class="tb-stat"><div class="tb-stat-val" id="st-s">-</div><div class="tb-stat-label">세부사업</div></div>
+  <div class="tb-stat"><div class="tb-stat-val" id="st-d">-</div><div class="tb-stat-label">내역사업</div></div>
+  <div class="tb-sp"></div>
+  <button class="tbtn" onclick="resetCam()">📷 초기시점</button>
+  <button class="tbtn on" id="btn-lbl" onclick="toggleLabels()">🏷 라벨</button>
+  <button class="tbtn on" id="btn-pf" onclick="togglePFRing()">🔵 정책분야</button>
+  <button class="tbtn on" id="btn-none" onclick="toggleNone()">⬜ 미분류</button>
 </div>
-
-<!-- 범례 -->
 <div id="legend">
-  <div class="legend-title">10대 핵심투자분야</div>
-  <div id="legend-items"></div>
-  <div class="legend-sep"></div>
-  <div class="legend-scale">
-    <div class="legend-scale-title">예산 규모 (빌딩 높이)</div>
-    <div class="scale-bars" id="scale-bars"></div>
-  </div>
+  <div class="leg-sec">12대 국가전략기술 (내부)</div>
+  <div id="leg-st"></div>
+  <div class="leg-sep"></div>
+  <div class="leg-sec">8대 정책분야 (외부)</div>
+  <div id="leg-pf"></div>
+  <div class="leg-sep"></div>
+  <div class="leg-sec">기타</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#475569"></div><div class="leg-label">미분류 사업</div><div class="leg-cnt" id="leg-nc">-</div></div>
+  <div class="leg-sep"></div>
+  <div style="font-size:10px;color:#475569;margin-bottom:5px">빌딩 높이 (예산)</div>
+  <div id="leg-scale"></div>
 </div>
-
-<!-- 캔버스 -->
 <div id="canvas-wrap"></div>
-
-<!-- 툴팁 -->
-<div id="tooltip"><div class="tt-inner" id="tt-inner"></div></div>
-
-<!-- 선택 패널 -->
-<div id="info-panel">
-  <button class="ip-close" onclick="closePanel()">✕</button>
-  <div class="ip-title" id="ip-title"></div>
-  <div id="ip-body"></div>
-</div>
-
-<!-- 조작 힌트 -->
-<div id="hint">🖱 드래그: 회전 &nbsp;|&nbsp; 휠: 줌 &nbsp;|&nbsp; 우클릭: 이동 &nbsp;|&nbsp; 빌딩 클릭: 상세보기</div>
-
-<!-- Three.js r128 -->
+<div id="tooltip"><div class="tt" id="tt-in"></div></div>
+<div id="panel"><button class="pn-close" onclick="closePanel()">&#x2715;</button><div class="pn-title" id="pn-title"></div><div id="pn-body"></div></div>
+<div id="hint">🖱 드래그: 회전 &nbsp;|&nbsp; 휠: 줌 &nbsp;|&nbsp; 우클릭 드래그: 이동 &nbsp;|&nbsp; 빌딩 클릭: 상세보기</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
 <script>
-// ══════════════════════════════════════════
-//  상수 & 색상
-// ══════════════════════════════════════════
-const CORE10 = ['인공지능','에너지','전략기술','방산','중소벤처','기초연구','인력양성','출연기관','지역성장','재난안전'];
-const DOMAIN_COLORS = {
-  '인공지능': '#3b82f6',  '에너지':   '#f59e0b',  '전략기술': '#8b5cf6',
-  '방산':     '#374151',  '중소벤처': '#ea580c',  '기초연구': '#0891b2',
-  '인력양성': '#db2777',  '출연기관': '#059669',  '지역성장': '#65a30d',
-  '재난안전': '#dc2626',
-};
-const NONE_COLOR = '#334155';
 
-// 블록 색상 팔레트 (내역사업용 - 톤 변화)
-const BLOCK_PALETTE = [
-  '#3b82f6','#60a5fa','#93c5fd','#bfdbfe',
-  '#8b5cf6','#a78bfa','#c4b5fd',
-  '#10b981','#34d399','#6ee7b7',
-  '#f59e0b','#fbbf24','#fcd34d',
-  '#ef4444','#f87171','#fca5a5',
-  '#06b6d4','#22d3ee','#67e8f9',
-];
+const ST_COLORS={'인공지능':'#2563eb','첨단바이오':'#059669','양자':'#7c3aed','우주항공해양':'#d97706','반도체/디스플레이':'#dc2626','첨단모빌리티':'#0d9488','첨단로봇제조':'#ea580c','차세대통신':'#4f46e5','수소':'#db2777','차세대원자력':'#65a30d','이차전지':'#0891b2','사이버보안':'#9333ea'};
+const PF_COLORS={'기초':'#2563eb','탄소중립':'#059669','국방':'#7c3aed','출연직할':'#d97706','재난안전':'#dc2626','지역':'#0d9488','기술사업화':'#ea580c','인력양성':'#4f46e5'};
+const BLOCK_PAL=['#3b82f6','#60a5fa','#93c5fd','#8b5cf6','#a78bfa','#10b981','#34d399','#f59e0b','#fbbf24','#ef4444','#f87171','#06b6d4','#22d3ee','#ec4899','#f472b6','#84cc16','#a3e635'];
+let scene,camera,renderer,maxBudget=1;
+let buildingMeshes=[],labelObjs=[],pfRingObjs=[],noneObjs=[];
+let showLabels=true,showPFRing=true,showNone=true;
+const MAX_H=110,BLDG_W=9;
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2();
+let hovered=null;
+const orb={isRot:false,isPan:false,lx:0,ly:0,theta:0.3,phi:0.38,radius:1100,tgt:new THREE.Vector3()};
 
-// ══════════════════════════════════════════
-//  전역 상태
-// ══════════════════════════════════════════
-let scene, camera, renderer, controls;
-let allBuildings = [];
-let buildingMeshes = [];   // [{group, data, meshes:[]}]
-let labelSprites = [];
-let groundMesh, groundGrid;
-let showLabels = true, showGround = true;
-let maxBudget = 1;
-const HEIGHT_SCALE = 0.008;   // 백만원 → Three.js 단위
-const MAX_HEIGHT = 120;
-const BLDG_SIZE = 10;          // 빌딩 폭
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-let hoveredBuilding = null;
-let selectedBuilding = null;
-
-// ══════════════════════════════════════════
-//  초기화
-// ══════════════════════════════════════════
-async function init() {
-  setSub('데이터 로딩 중...');
-  const res = await fetch('map3d.json');
-  const mapData = await res.json();
-  allBuildings = mapData.buildings;
-  maxBudget = mapData.maxBudget;
-
-  setSub('Three.js 씬 구성 중...');
-  setupScene();
-  setupLights();
-  setupGround(mapData.centers);
-  setSub('빌딩 생성 중...');
-  await buildCityAsync(allBuildings);
-  setupDomainLabels(mapData.centers);
-  setupLegend(allBuildings);
-  setupStats(allBuildings);
-  setupEvents();
-
-  document.getElementById('loading').style.display = 'none';
+async function init(){
+  setT('데이터 로딩...');
+  const res=await fetch('map3d.json');
+  const D=await res.json();
+  maxBudget=D.maxBudget;
+  setT('씬 구성...');
+  setupScene();setupLights();
+  setT('밴다이어그램 구성...');
+  setupGround(D);
+  setT('빌딩 생성...');
+  await buildCity(D.buildings,D.st_centers,D.pf_centers);
+  setupLegend(D);setupStats(D.buildings);setupEvents();
+  document.getElementById('loading').style.display='none';
   animate();
 }
+function setT(t){document.getElementById('load-txt').textContent=t;}
 
-function setSub(t){ document.getElementById('load-sub').textContent = t; }
-
-// ══════════════════════════════════════════
-//  씬 & 카메라
-// ══════════════════════════════════════════
-function setupScene() {
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b0f1a);
-  scene.fog = new THREE.FogExp2(0x0b0f1a, 0.00055);
-
-  const W = window.innerWidth, H = window.innerHeight;
-  camera = new THREE.PerspectiveCamera(45, W/H, 1, 8000);
-  camera.position.set(0, 600, 800);
-  camera.lookAt(0, 0, 0);
-
-  renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+function setupScene(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0b0f1a);
+  scene.fog=new THREE.FogExp2(0x0b0f1a,0.00045);
+  camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,1,8000);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   document.getElementById('canvas-wrap').appendChild(renderer.domElement);
+  updateCam();
+  window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+}
 
-  // OrbitControls 수동 구현 (CDN 미제공 대신)
-  setupOrbitControls();
-
-  window.addEventListener('resize', ()=>{
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+function setupLights(){
+  scene.add(new THREE.AmbientLight(0x3b4a6b,1.7));
+  const d=new THREE.DirectionalLight(0xffffff,1.8);
+  d.position.set(400,700,400);d.castShadow=true;
+  d.shadow.mapSize.set(2048,2048);
+  d.shadow.camera.left=-1000;d.shadow.camera.right=1000;
+  d.shadow.camera.top=1000;d.shadow.camera.bottom=-1000;
+  d.shadow.camera.far=2500;
+  scene.add(d);
+  [[0x2563eb,[-500,200,-500]],[0x7c3aed,[500,200,-500]],[0xd97706,[-500,200,500]],[0x059669,[500,200,500]]].forEach(([c,p])=>{
+    const pt=new THREE.PointLight(c,0.3,1000);pt.position.set(...p);scene.add(pt);
   });
 }
 
-// ── 간단한 OrbitControls 구현 ──
-let orbitState = {
-  isRotating: false, isPanning: false,
-  lastX: 0, lastY: 0,
-  theta: 0, phi: Math.PI/4,
-  radius: 1000,
-  target: new THREE.Vector3(0, 0, 0),
-};
+function setupGround(D){
+  // 지면
+  const gm=new THREE.Mesh(new THREE.PlaneGeometry(3200,3200),new THREE.MeshLambertMaterial({color:0x070c15}));
+  gm.rotation.x=-Math.PI/2;gm.receiveShadow=true;scene.add(gm);
+  scene.add(Object.assign(new THREE.GridHelper(3200,110,0x111827,0x111827),{position:{x:0,y:0.2,z:0}}));
 
-function setupOrbitControls() {
-  const el = renderer.domElement;
-  el.addEventListener('mousedown', e => {
-    if(e.button===0){ orbitState.isRotating=true; }
-    if(e.button===2){ orbitState.isPanning=true; }
-    orbitState.lastX = e.clientX; orbitState.lastY = e.clientY;
+  const R_ST=D.R_ST; // 260
+  const PETAL=118;   // 전략기술 원 반지름
+
+  // ① 12대 전략기술 내부 구역 (채우기 + 테두리)
+  D.st_names.forEach(n=>{
+    const col=new THREE.Color(ST_COLORS[n]||'#334155');
+    const [cx,cy]=D.st_centers[n];
+    // 채우기
+    const f=new THREE.Mesh(new THREE.CircleGeometry(PETAL,64),
+      new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.08,side:THREE.DoubleSide,depthWrite:false}));
+    f.rotation.x=-Math.PI/2;f.position.set(cx,0.4,cy);scene.add(f);
+    // 링 테두리
+    const r=new THREE.Mesh(new THREE.RingGeometry(PETAL-2,PETAL+3,64),
+      new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.45,side:THREE.DoubleSide,depthWrite:false}));
+    r.rotation.x=-Math.PI/2;r.position.set(cx,0.6,cy);scene.add(r);
   });
-  el.addEventListener('mousemove', e => {
-    const dx = e.clientX - orbitState.lastX;
-    const dy = e.clientY - orbitState.lastY;
-    orbitState.lastX = e.clientX; orbitState.lastY = e.clientY;
-    if(orbitState.isRotating){
-      orbitState.theta -= dx * 0.003;
-      orbitState.phi = Math.max(0.05, Math.min(Math.PI/2-0.02, orbitState.phi - dy*0.003));
-      updateCamera();
-    }
-    if(orbitState.isPanning){
-      const right = new THREE.Vector3();
-      const up = new THREE.Vector3(0,1,0);
-      right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), up).normalize();
-      const panSpeed = orbitState.radius * 0.001;
-      orbitState.target.addScaledVector(right, -dx * panSpeed);
-      orbitState.target.y += dy * panSpeed;
-      updateCamera();
-    }
+
+  // 전략기술 중앙 공용 구역
+  const cFill=new THREE.Mesh(new THREE.CircleGeometry(R_ST*0.36,64),
+    new THREE.MeshBasicMaterial({color:0x1a2744,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false}));
+  cFill.rotation.x=-Math.PI/2;cFill.position.set(0,0.3,0);scene.add(cFill);
+
+  // ST/PF 경계 구분링
+  const bRing=new THREE.Mesh(new THREE.RingGeometry(R_ST+PETAL+8,R_ST+PETAL+13,128),
+    new THREE.MeshBasicMaterial({color:0x1e3a5f,transparent:true,opacity:0.28,side:THREE.DoubleSide,depthWrite:false}));
+  bRing.rotation.x=-Math.PI/2;bRing.position.set(0,0.25,0);
+  pfRingObjs.push(bRing);scene.add(bRing);
+
+  // ② 8대 정책분야 외부 구역
+  const PF_PETAL=92;
+  D.pf_names.forEach(n=>{
+    const col=new THREE.Color(PF_COLORS[n]||'#334155');
+    const [cx,cy]=D.pf_centers[n];
+    const f=new THREE.Mesh(new THREE.CircleGeometry(PF_PETAL,64),
+      new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.06,side:THREE.DoubleSide,depthWrite:false}));
+    f.rotation.x=-Math.PI/2;f.position.set(cx,0.4,cy);pfRingObjs.push(f);scene.add(f);
+    const r=new THREE.Mesh(new THREE.RingGeometry(PF_PETAL-2,PF_PETAL+3,64),
+      new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.38,side:THREE.DoubleSide,depthWrite:false}));
+    r.rotation.x=-Math.PI/2;r.position.set(cx,0.6,cy);pfRingObjs.push(r);scene.add(r);
   });
-  el.addEventListener('mouseup', ()=>{ orbitState.isRotating=false; orbitState.isPanning=false; });
-  el.addEventListener('wheel', e=>{
-    orbitState.radius = Math.max(80, Math.min(3000, orbitState.radius * (1 + e.deltaY*0.001)));
-    updateCamera();
-  }, {passive:true});
-  el.addEventListener('contextmenu', e=>e.preventDefault());
-  updateCamera();
+
+  // ③ 미분류 중앙 구역
+  const nf=new THREE.Mesh(new THREE.CircleGeometry(72,64),
+    new THREE.MeshBasicMaterial({color:0x334155,transparent:true,opacity:0.12,side:THREE.DoubleSide,depthWrite:false}));
+  nf.rotation.x=-Math.PI/2;nf.position.set(0,0.5,0);noneObjs.push(nf);scene.add(nf);
+  const nr=new THREE.Mesh(new THREE.RingGeometry(70,75,64),
+    new THREE.MeshBasicMaterial({color:0x475569,transparent:true,opacity:0.32,side:THREE.DoubleSide,depthWrite:false}));
+  nr.rotation.x=-Math.PI/2;nr.position.set(0,0.7,0);noneObjs.push(nr);scene.add(nr);
 }
 
-function updateCamera() {
-  const {theta, phi, radius, target} = orbitState;
-  camera.position.set(
-    target.x + radius * Math.sin(phi) * Math.sin(theta),
-    target.y + radius * Math.cos(phi),
-    target.z + radius * Math.sin(phi) * Math.cos(theta)
-  );
-  camera.lookAt(target);
-}
-
-function resetCamera() {
-  orbitState.theta = 0; orbitState.phi = Math.PI/4; orbitState.radius = 1000;
-  orbitState.target.set(0,0,0);
-  updateCamera();
-}
-
-// ══════════════════════════════════════════
-//  조명
-// ══════════════════════════════════════════
-function setupLights() {
-  const ambient = new THREE.AmbientLight(0x334155, 1.2);
-  scene.add(ambient);
-
-  const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-  dirLight.position.set(300, 600, 300);
-  dirLight.castShadow = true;
-  dirLight.shadow.mapSize.set(2048, 2048);
-  dirLight.shadow.camera.near = 1;
-  dirLight.shadow.camera.far = 2000;
-  dirLight.shadow.camera.left = -800;
-  dirLight.shadow.camera.right = 800;
-  dirLight.shadow.camera.top = 800;
-  dirLight.shadow.camera.bottom = -800;
-  scene.add(dirLight);
-
-  // 보조 포인트 라이트 (도시 느낌)
-  const ptColors = [0x3b82f6, 0x8b5cf6, 0xf59e0b, 0x10b981];
-  const ptPositions = [[-300,200,-300],[300,200,-300],[-300,200,300],[300,200,300]];
-  ptPositions.forEach((p,i)=>{
-    const pt = new THREE.PointLight(ptColors[i], 0.4, 800);
-    pt.position.set(...p);
-    scene.add(pt);
-  });
-}
-
-// ══════════════════════════════════════════
-//  지면
-// ══════════════════════════════════════════
-function setupGround(centers) {
-  // 지면 플레이트
-  const geo = new THREE.PlaneGeometry(2400, 2400);
-  const mat = new THREE.MeshLambertMaterial({color: 0x0f172a, transparent:true, opacity:0.95});
-  groundMesh = new THREE.Mesh(geo, mat);
-  groundMesh.rotation.x = -Math.PI/2;
-  groundMesh.receiveShadow = true;
-  scene.add(groundMesh);
-
-  // 격자
-  const gridHelper = new THREE.GridHelper(2400, 80, 0x1e293b, 0x1e293b);
-  gridHelper.position.y = 0.2;
-  groundGrid = gridHelper;
-  scene.add(groundGrid);
-
-  // 분야 구역 원형 표시
-  Object.entries(centers).forEach(([name, [cx, cy]])=>{
-    const color = new THREE.Color(DOMAIN_COLORS[name] || '#334155');
-    const ringGeo = new THREE.RingGeometry(85, 92, 64);
-    const ringMat = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.25, side:THREE.DoubleSide});
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = -Math.PI/2;
-    ring.position.set(cx, 0.5, cy);
-    scene.add(ring);
-
-    // 구역 바닥 채우기
-    const circGeo = new THREE.CircleGeometry(84, 64);
-    const circMat = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.04, side:THREE.DoubleSide});
-    const circ = new THREE.Mesh(circGeo, circMat);
-    circ.rotation.x = -Math.PI/2;
-    circ.position.set(cx, 0.3, cy);
-    scene.add(circ);
-  });
-}
-
-// ══════════════════════════════════════════
-//  빌딩 생성 (비동기 청크)
-// ══════════════════════════════════════════
-async function buildCityAsync(buildings) {
-  const CHUNK = 60;
-  for(let i=0; i<buildings.length; i+=CHUNK){
-    const chunk = buildings.slice(i, i+CHUNK);
-    chunk.forEach(b => createBuilding(b));
-    setSub(`빌딩 생성 중... ${Math.min(i+CHUNK, buildings.length)} / ${buildings.length}`);
+async function buildCity(buildings,stC,pfC){
+  const CHUNK=55;
+  for(let i=0;i<buildings.length;i+=CHUNK){
+    buildings.slice(i,i+CHUNK).forEach(b=>createBuilding(b,stC,pfC));
+    setT(`빌딩 생성... ${Math.min(i+CHUNK,buildings.length)} / ${buildings.length}`);
     await new Promise(r=>setTimeout(r,0));
   }
+  // ST 라벨
+  Object.entries(stC).forEach(([n,[cx,cy]])=>{
+    const sp=makeSprite(n,ST_COLORS[n]||'#fff',44);
+    sp.position.set(cx,7,cy);labelObjs.push(sp);scene.add(sp);
+  });
+  // PF 라벨
+  Object.entries(pfC).forEach(([n,[cx,cy]])=>{
+    const sp=makeSprite(n,PF_COLORS[n]||'#aaa',36);
+    sp.position.set(cx,7,cy);labelObjs.push(sp);pfRingObjs.push(sp);scene.add(sp);
+  });
+  // 미분류 라벨
+  const ns=makeSprite('미분류','#64748b',34);
+  ns.position.set(0,7,0);labelObjs.push(ns);noneObjs.push(ns);scene.add(ns);
 }
 
-function buildingHeight(budget) {
-  // 로그 스케일: 시각적으로 차이가 보이도록
-  const logH = Math.log(budget + 1) / Math.log(maxBudget + 1);
-  return Math.max(2, logH * MAX_HEIGHT);
-}
+function bldgH(budget){return Math.max(1.5,Math.pow(budget/maxBudget,0.42)*MAX_H);}
 
-function createBuilding(b) {
-  const group = new THREE.Group();
-  group.position.set(b.x, 0, b.z);
-  group.userData = b;
-
-  // 분야 대표 색상
-  const domainColor = b.domains.length > 0
-    ? DOMAIN_COLORS[b.domains[0]] || NONE_COLOR
-    : NONE_COLOR;
-
-  const totalH = buildingHeight(b.budget);
-  const blocks = b.blocks;
-  const totalBlockBudget = blocks.reduce((s,bl)=>s+bl.budget, 0);
-
-  let yOff = 0;
-  blocks.forEach((bl, i) => {
-    const ratio = totalBlockBudget > 0 ? bl.budget / totalBlockBudget : 1/blocks.length;
-    const h = Math.max(0.5, ratio * totalH);
-    const w = BLDG_SIZE;
-
-    const geo = new THREE.BoxGeometry(w, h, w);
-    // 블록 색상: 분야 색상 기반으로 밝기 변화
-    const baseColor = new THREE.Color(BLOCK_PALETTE[i % BLOCK_PALETTE.length]);
-    // 분야 색과 블록 색을 혼합
-    const domCol = new THREE.Color(domainColor);
-    baseColor.lerp(domCol, 0.4);
-
-    const mat = new THREE.MeshLambertMaterial({
-      color: baseColor,
-      transparent: true,
-      opacity: 0.88,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.y = yOff + h/2;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    mesh.userData = { building: b, blockIndex: i };
-    group.add(mesh);
-    yOff += h;
+function createBuilding(b,stC,pfC){
+  const group=new THREE.Group();
+  group.position.set(b.x,0,b.z);
+  group.userData=b;
+  let baseHex='#475569';
+  if(b.st_domains&&b.st_domains.length>0)baseHex=ST_COLORS[b.st_domains[0]]||'#475569';
+  else if(b.pf_domains&&b.pf_domains.length>0)baseHex=PF_COLORS[b.pf_domains[0]]||'#475569';
+  const totalH=bldgH(b.budget);
+  const blocks=b.blocks;
+  const totBud=blocks.reduce((s,bl)=>s+bl.budget,0)||1;
+  let yOff=0;
+  blocks.forEach((bl,i)=>{
+    const h=Math.max(0.4,(bl.budget/totBud)*totalH);
+    const base=new THREE.Color(BLOCK_PAL[i%BLOCK_PAL.length]);
+    base.lerp(new THREE.Color(baseHex),0.45);
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(BLDG_W,h,BLDG_W),
+      new THREE.MeshLambertMaterial({color:base,transparent:true,opacity:0.87}));
+    mesh.position.y=yOff+h/2;mesh.castShadow=true;mesh.receiveShadow=true;
+    mesh.userData={building:b};group.add(mesh);yOff+=h;
   });
-
-  // 옥상 발광 테두리
-  const edgeGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(BLDG_SIZE+0.2, totalH+0.1, BLDG_SIZE+0.2));
-  const edgeMat = new THREE.LineBasicMaterial({
-    color: new THREE.Color(domainColor),
-    transparent: true, opacity: 0.3
-  });
-  const edges = new THREE.LineSegments(edgeGeo, edgeMat);
-  edges.position.y = totalH / 2;
-  group.add(edges);
-
+  const edgeMat=new THREE.LineBasicMaterial({color:new THREE.Color(baseHex),transparent:true,opacity:0.28});
+  const edge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(BLDG_W+0.3,totalH+0.2,BLDG_W+0.3)),edgeMat);
+  edge.position.y=totalH/2;group.add(edge);
+  // 교집합(ST+PF) 빌딩: 곡선 연결선
+  if(b.has_st&&b.has_pf){
+    const stCx=b.st_domains.reduce((s,n)=>s+(stC[n]?stC[n][0]:0),0)/Math.max(1,b.st_domains.length);
+    const stCz=b.st_domains.reduce((s,n)=>s+(stC[n]?stC[n][1]:0),0)/Math.max(1,b.st_domains.length);
+    const pfCx=b.pf_domains.reduce((s,n)=>s+(pfC[n]?pfC[n][0]:0),0)/Math.max(1,b.pf_domains.length);
+    const pfCz=b.pf_domains.reduce((s,n)=>s+(pfC[n]?pfC[n][1]:0),0)/Math.max(1,b.pf_domains.length);
+    const pts=[new THREE.Vector3(b.x,totalH+2,b.z),new THREE.Vector3((b.x+pfCx)/2,totalH+22,(b.z+pfCz)/2),new THREE.Vector3(pfCx,3,pfCz)];
+    const geo=new THREE.BufferGeometry().setFromPoints(new THREE.CatmullRomCurve3(pts).getPoints(14));
+    scene.add(new THREE.Line(geo,new THREE.LineBasicMaterial({color:new THREE.Color(baseHex),transparent:true,opacity:0.16})));
+  }
   scene.add(group);
-  buildingMeshes.push({ group, data: b, edges, edgeMat, totalH });
+  buildingMeshes.push({group,data:b,edgeMat,totalH});
+  if(!b.has_st&&!b.has_pf)noneObjs.push(group);
 }
 
-// ══════════════════════════════════════════
-//  도메인 라벨 (Sprite)
-// ══════════════════════════════════════════
-function setupDomainLabels(centers) {
-  Object.entries(centers).forEach(([name, [cx, cy]])=>{
-    const sprite = makeTextSprite(name, DOMAIN_COLORS[name] || '#ffffff', 52);
-    sprite.position.set(cx, 8, cy);
-    scene.add(sprite);
-    labelSprites.push(sprite);
+function makeSprite(text,color,size){
+  const c=document.createElement('canvas');c.width=512;c.height=128;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,512,128);
+  ctx.font=`bold ${size}px 'Noto Sans KR',sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(0,0,0,.95)';ctx.shadowBlur=14;
+  ctx.fillStyle=color;ctx.fillText(text,256,64);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  sp.scale.set(110,28,1);return sp;
+}
+
+function setupLegend(D){
+  const stC={},pfC={};
+  D.buildings.forEach(b=>{(b.st_domains||[]).forEach(n=>stC[n]=(stC[n]||0)+1);(b.pf_domains||[]).forEach(n=>pfC[n]=(pfC[n]||0)+1);});
+  const noneC=D.buildings.filter(b=>!b.has_st&&!b.has_pf).length;
+  const stEl=document.getElementById('leg-st');
+  D.st_names.forEach(n=>{const d=document.createElement('div');d.className='leg-item';d.innerHTML=`<div class="leg-dot" style="background:${ST_COLORS[n]}"></div><div class="leg-label">${n}</div><div class="leg-cnt">${stC[n]||0}</div>`;stEl.appendChild(d);});
+  const pfEl=document.getElementById('leg-pf');
+  D.pf_names.forEach(n=>{const d=document.createElement('div');d.className='leg-item';d.innerHTML=`<div class="leg-dot" style="background:${PF_COLORS[n]}"></div><div class="leg-label">${n}</div><div class="leg-cnt">${pfC[n]||0}</div>`;pfEl.appendChild(d);});
+  document.getElementById('leg-nc').textContent=noneC;
+  const sc=document.getElementById('leg-scale');
+  [{l:'1조원이상',h:20},{l:'1000억',h:13},{l:'100억',h:7},{l:'10억이하',h:3}].forEach(s=>{
+    const r=document.createElement('div');r.className='scale-row';
+    r.innerHTML=`<div class="scale-block" style="width:9px;height:${s.h}px;background:#3b82f6"></div><div class="scale-text">${s.l}</div>`;sc.appendChild(r);
   });
 }
-
-function makeTextSprite(text, color, size=40) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 512; canvas.height = 128;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,512,128);
-  ctx.font = `bold ${size}px 'Noto Sans KR', sans-serif`;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 12;
-  ctx.fillStyle = color;
-  ctx.fillText(text, 256, 64);
-  const tex = new THREE.CanvasTexture(canvas);
-  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(120, 30, 1);
-  return sprite;
+function setupStats(b){
+  document.getElementById('st-b').textContent=(b.reduce((s,r)=>s+r.budget,0)/1000000).toFixed(2);
+  document.getElementById('st-s').textContent=b.length.toLocaleString();
+  document.getElementById('st-d').textContent=b.reduce((s,r)=>s+r.blocks.length,0).toLocaleString();
 }
 
-// ══════════════════════════════════════════
-//  범례
-// ══════════════════════════════════════════
-function setupLegend(buildings) {
-  const counts = {};
-  CORE10.forEach(k=>counts[k]=0);
-  counts['(미분류)'] = 0;
-  buildings.forEach(b=>{
-    if(!b.domains.length){ counts['(미분류)']++; return; }
-    b.domains.forEach(d=>{ if(counts[d]!==undefined) counts[d]++; });
+function setupEvents(){
+  const el=renderer.domElement;
+  el.addEventListener('mousedown',e=>{if(e.button===0)orb.isRot=true;if(e.button===2)orb.isPan=true;orb.lx=e.clientX;orb.ly=e.clientY;});
+  el.addEventListener('mousemove',e=>{
+    const dx=e.clientX-orb.lx,dy=e.clientY-orb.ly;orb.lx=e.clientX;orb.ly=e.clientY;
+    if(orb.isRot){orb.theta-=dx*0.003;orb.phi=Math.max(0.04,Math.min(Math.PI/2-0.01,orb.phi-dy*0.003));updateCam();}
+    if(orb.isPan){const right=new THREE.Vector3();right.crossVectors(camera.getWorldDirection(new THREE.Vector3()),new THREE.Vector3(0,1,0)).normalize();const sp=orb.radius*0.0009;orb.tgt.addScaledVector(right,-dx*sp);orb.tgt.y+=dy*sp;updateCam();}
+    mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
+    handleHover(e);
   });
-
-  const el = document.getElementById('legend-items');
-  [...CORE10,'(미분류)'].forEach(name=>{
-    const color = DOMAIN_COLORS[name] || NONE_COLOR;
-    const div = document.createElement('div');
-    div.className = 'legend-item';
-    div.innerHTML = `<div class="legend-dot" style="background:${color}"></div>
-      <div class="legend-label">${name}</div>
-      <div class="legend-count">${counts[name]||0}</div>`;
-    el.appendChild(div);
-  });
-
-  // 높이 스케일
-  const sb = document.getElementById('scale-bars');
-  [{label:'1조원+', h:18},{label:'1000억', h:12},{label:'100억', h:7},{label:'10억', h:3}].forEach(s=>{
-    const row = document.createElement('div');
-    row.className='scale-row';
-    row.innerHTML=`<div class="scale-block" style="width:10px;height:${s.h}px;background:#3b82f6"></div>
-      <div class="scale-text">${s.label}</div>`;
-    sb.appendChild(row);
-  });
+  el.addEventListener('mouseup',()=>{orb.isRot=false;orb.isPan=false;});
+  el.addEventListener('wheel',e=>{orb.radius=Math.max(60,Math.min(3500,orb.radius*(1+e.deltaY*0.001)));updateCam();},{passive:true});
+  el.addEventListener('click',handleClick);
+  el.addEventListener('contextmenu',e=>e.preventDefault());
 }
+function updateCam(){const{theta,phi,radius,tgt}=orb;camera.position.set(tgt.x+radius*Math.sin(phi)*Math.sin(theta),tgt.y+radius*Math.cos(phi),tgt.z+radius*Math.sin(phi)*Math.cos(theta));camera.lookAt(tgt);}
+function resetCam(){orb.theta=0.3;orb.phi=0.38;orb.radius=1100;orb.tgt.set(0,0,0);updateCam();}
 
-function setupStats(buildings) {
-  const total = buildings.reduce((s,b)=>s+b.budget,0);
-  const dets = buildings.reduce((s,b)=>s+b.blocks.length,0);
-  document.getElementById('st-budget').textContent = (total/1000000).toFixed(2);
-  document.getElementById('st-sub').textContent = buildings.length.toLocaleString();
-  document.getElementById('st-det').textContent = dets.toLocaleString();
+function getMeshes(){const m=[];buildingMeshes.forEach(bm=>bm.group.children.forEach(c=>{if(c.isMesh)m.push(c);}));return m;}
+
+function handleHover(e){
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObjects(getMeshes());
+  const tt=document.getElementById('tooltip');
+  if(hits.length&&hits[0].object.userData.building){
+    const b=hits[0].object.userData.building;
+    if(hovered!==b.id){if(hovered)highlight(hovered,false);hovered=b.id;highlight(b.id,true);}
+    const stT=(b.st_domains||[]).map(d=>`<span class="tt-tag" style="background:${ST_COLORS[d]}22;color:${ST_COLORS[d]};border:1px solid ${ST_COLORS[d]}44">${d}</span>`).join('');
+    const pfT=(b.pf_domains||[]).map(d=>`<span class="tt-tag" style="background:${PF_COLORS[d]}22;color:${PF_COLORS[d]};border:1px solid ${PF_COLORS[d]}44">${d}</span>`).join('');
+    const bls=b.blocks.slice(0,4).map(bl=>`<div class="tt-br"><span class="tt-bn">${bl.name}</span><span class="tt-bv">${fmtB(bl.budget)}</span></div>`).join('');
+    const more=b.blocks.length-4;
+    document.getElementById('tt-in').innerHTML=`<div class="tt-name">${b.name}</div><div class="tt-row"><span class="tt-k">부처</span><span class="tt-v">${b.ministry}</span></div><div class="tt-row"><span class="tt-k">예산</span><span class="tt-v hi">${fmtB(b.budget)}</span></div><div class="tt-tags">${stT}${pfT}${(!stT&&!pfT)?'<span style="color:#475569;font-size:10px">미분류</span>':''}</div>${b.blocks.length>1?`<div class="tt-blocks"><div class="tt-bt">내역사업(${b.blocks.length}개)</div>${bls}${more>0?`<div style="font-size:9px;color:#475569">+${more}개 더...</div>`:''}</div>`:''}`;
+    tt.style.display='block';tt.style.left=Math.min(e.clientX+14,innerWidth-320)+'px';tt.style.top=Math.min(e.clientY-10,innerHeight-280)+'px';
+    renderer.domElement.style.cursor='pointer';
+  }else{if(hovered){highlight(hovered,false);hovered=null;}tt.style.display='none';renderer.domElement.style.cursor='default';}
 }
+function handleClick(){raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(getMeshes());if(hits.length&&hits[0].object.userData.building)showPanel(hits[0].object.userData.building);}
+function highlight(id,on){buildingMeshes.forEach(bm=>{if(bm.data.id===id){bm.group.children.forEach(c=>{if(c.isMesh){c.material.emissive=on?new THREE.Color(0x223355):new THREE.Color(0);c.material.opacity=on?1:0.87;}});bm.edgeMat.opacity=on?0.9:0.28;}});}
 
-// ══════════════════════════════════════════
-//  이벤트 (마우스 hover / click)
-// ══════════════════════════════════════════
-function setupEvents() {
-  const el = renderer.domElement;
-  el.addEventListener('mousemove', onMouseMove);
-  el.addEventListener('click', onClick);
+function showPanel(b){
+  document.getElementById('pn-title').textContent=b.name;
+  const maxBl=Math.max(...b.blocks.map(bl=>bl.budget));
+  const stT=(b.st_domains||[]).map(d=>`<span class="pn-tag" style="background:${ST_COLORS[d]}22;color:${ST_COLORS[d]};border:1px solid ${ST_COLORS[d]}44">${d}</span>`).join('');
+  const pfT=(b.pf_domains||[]).map(d=>`<span class="pn-tag" style="background:${PF_COLORS[d]}22;color:${PF_COLORS[d]};border:1px solid ${PF_COLORS[d]}44">${d}</span>`).join('');
+  const bls=b.blocks.map((bl,i)=>`<div class="pn-brow"><div class="pn-bname" title="${bl.name}">${bl.name}</div><div class="pn-bwrap"><div class="pn-bbar" style="width:${maxBl>0?bl.budget/maxBl*100:0}%;background:${BLOCK_PAL[i%BLOCK_PAL.length]}"></div></div><div class="pn-bval">${fmtB(bl.budget)}</div></div>`).join('');
+  document.getElementById('pn-body').innerHTML=`<div class="pn-row"><span class="pn-k">부처</span><span class="pn-v">${b.ministry}</span></div><div class="pn-row"><span class="pn-k">전문위</span><span class="pn-v">${b.committee}</span></div><div class="pn-row"><span class="pn-k">총 예산</span><span class="pn-v" style="color:#60a5fa;font-size:12px">${fmtB(b.budget)}</span></div><div class="pn-tags">${stT}${pfT}${(!stT&&!pfT)?'<span style="color:#475569;font-size:11px">미분류</span>':''}</div>${b.blocks.length>1?`<div class="pn-bsec"><div class="pn-bsec-t">내역사업(${b.blocks.length}개)</div>${bls}</div>`:''}`;
+  document.getElementById('panel').style.display='block';
 }
+function closePanel(){document.getElementById('panel').style.display='none';}
+function toggleLabels(){showLabels=!showLabels;labelObjs.forEach(o=>o.visible=showLabels);document.getElementById('btn-lbl').classList.toggle('on',showLabels);}
+function togglePFRing(){showPFRing=!showPFRing;pfRingObjs.forEach(o=>o.visible=showPFRing);document.getElementById('btn-pf').classList.toggle('on',showPFRing);}
+function toggleNone(){showNone=!showNone;noneObjs.forEach(o=>o.visible=showNone);document.getElementById('btn-none').classList.toggle('on',showNone);}
+function fmtB(v){if(v>=1000000)return(v/1000000).toFixed(2)+'조원';if(v>=100000)return(v/100000).toFixed(1)+'천억원';if(v>=10000)return(v/10000).toFixed(0)+'백억원';if(v>=100)return(v/100).toFixed(0)+'억원';return v+'백만원';}
+function animate(){requestAnimationFrame(animate);renderer.render(scene,camera);}
+init().catch(e=>{document.getElementById('loading').innerHTML=`<div style="color:#ef4444;text-align:center"><div style="font-size:36px">⚠️</div><div style="color:#e2e8f0;margin-top:10px">${e.message}</div><div style="color:#475569;font-size:12px;margin-top:6px">map3d.json 확인 필요</div></div>`;});
 
-function getMeshesFromScene() {
-  const meshes = [];
-  buildingMeshes.forEach(bm=>{
-    bm.group.children.forEach(c=>{
-      if(c.isMesh) meshes.push(c);
-    });
-  });
-  return meshes;
-}
-
-function onMouseMove(e) {
-  mouse.x = (e.clientX / window.innerWidth)*2-1;
-  mouse.y = -(e.clientY / window.innerHeight)*2+1;
-
-  raycaster.setFromCamera(mouse, camera);
-  const meshes = getMeshesFromScene();
-  const hits = raycaster.intersectObjects(meshes);
-
-  const tt = document.getElementById('tooltip');
-  if(hits.length > 0) {
-    const hit = hits[0];
-    const b = hit.object.userData.building;
-    if(!b){tt.style.display='none'; hoveredBuilding=null; return;}
-
-    // 하이라이트
-    if(hoveredBuilding !== b.id) {
-      restoreHover();
-      hoveredBuilding = b.id;
-      highlightBuilding(b.id, true);
-    }
-
-    // 툴팁
-    const blocks = b.blocks.slice(0,5);
-    const moreCount = b.blocks.length - 5;
-    const domTags = b.domains.map(d=>
-      `<span class="tt-domain" style="background:${DOMAIN_COLORS[d]}22;color:${DOMAIN_COLORS[d]};border:1px solid ${DOMAIN_COLORS[d]}44">${d}</span>`
-    ).join('');
-    const blockRows = blocks.map(bl=>
-      `<div class="tt-block-row"><span class="tt-block-name">${bl.name}</span><span class="tt-block-val">${fmtB(bl.budget)}</span></div>`
-    ).join('');
-
-    document.getElementById('tt-inner').innerHTML = `
-      <div class="tt-name">${b.name}</div>
-      <div class="tt-row"><span class="tt-key">부처</span><span class="tt-val">${b.ministry}</span></div>
-      <div class="tt-row"><span class="tt-key">전문위</span><span class="tt-val">${b.committee}</span></div>
-      <div class="tt-row"><span class="tt-key">예산</span><span class="tt-val accent">${fmtB(b.budget)}</span></div>
-      <div class="tt-domains">${domTags||'<span style="color:#475569;font-size:10px">미분류</span>'}</div>
-      ${b.blocks.length>1?`<div class="tt-blocks">
-        <div class="tt-block-title">내역사업 (${b.blocks.length}개)</div>
-        ${blockRows}
-        ${moreCount>0?`<div style="font-size:10px;color:#475569">+ ${moreCount}개 더...</div>`:''}
-      </div>`:''}`;
-
-    tt.style.display = 'block';
-    tt.style.left = Math.min(e.clientX+12, window.innerWidth-340)+'px';
-    tt.style.top  = Math.min(e.clientY-10, window.innerHeight-300)+'px';
-    renderer.domElement.style.cursor = 'pointer';
-  } else {
-    restoreHover();
-    hoveredBuilding = null;
-    tt.style.display = 'none';
-    renderer.domElement.style.cursor = 'default';
-  }
-}
-
-function onClick(e) {
-  // 드래그 vs 클릭 구분
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObjects(getMeshesFromScene());
-  if(hits.length > 0 && hits[0].object.userData.building) {
-    showPanel(hits[0].object.userData.building);
-  }
-}
-
-function highlightBuilding(id, on) {
-  buildingMeshes.forEach(bm=>{
-    if(bm.data.id === id){
-      bm.group.children.forEach(c=>{
-        if(c.isMesh){
-          c.material.emissive = on ? new THREE.Color(0x334155) : new THREE.Color(0x000000);
-          c.material.opacity = on ? 1.0 : 0.88;
-        }
-      });
-      bm.edgeMat.opacity = on ? 0.9 : 0.3;
-    }
-  });
-}
-
-function restoreHover() {
-  if(hoveredBuilding) highlightBuilding(hoveredBuilding, false);
-}
-
-// ══════════════════════════════════════════
-//  선택 패널
-// ══════════════════════════════════════════
-function showPanel(b) {
-  selectedBuilding = b.id;
-  document.getElementById('ip-title').textContent = b.name;
-  const maxBlock = Math.max(...b.blocks.map(bl=>bl.budget));
-  const domTags = b.domains.map(d=>
-    `<span class="tt-domain" style="background:${DOMAIN_COLORS[d]}22;color:${DOMAIN_COLORS[d]};border:1px solid ${DOMAIN_COLORS[d]}44;font-size:11px;padding:2px 8px;border-radius:4px">${d}</span>`
-  ).join('');
-
-  const blockRows = b.blocks.map((bl,i)=>{
-    const pct = maxBlock>0?bl.budget/maxBlock*100:0;
-    const col = BLOCK_PALETTE[i%BLOCK_PALETTE.length];
-    return `<div class="ip-block">
-      <div class="ip-block-name" title="${bl.name}">${bl.name}</div>
-      <div class="ip-block-bar-wrap"><div class="ip-block-bar" style="width:${pct}%;background:${col}"></div></div>
-      <div class="ip-block-val">${fmtB(bl.budget)}</div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('ip-body').innerHTML = `
-    <div class="ip-row"><span class="ip-key">부처</span><span class="ip-val">${b.ministry}</span></div>
-    <div class="ip-row"><span class="ip-key">전문위</span><span class="ip-val">${b.committee}</span></div>
-    <div class="ip-row"><span class="ip-key">총 예산</span><span class="ip-val" style="color:#60a5fa;font-size:13px">${fmtB(b.budget)}</span></div>
-    <div class="ip-domains">${domTags||'<span style="color:#475569;font-size:11px">미분류</span>'}</div>
-    ${b.blocks.length>1?`<div class="ip-blocks">
-      <div class="ip-blocks-title">내역사업 구성 (${b.blocks.length}개)</div>
-      ${blockRows}
-    </div>`:''}`;
-
-  document.getElementById('info-panel').style.display = 'block';
-}
-
-function closePanel() {
-  document.getElementById('info-panel').style.display = 'none';
-  selectedBuilding = null;
-}
-
-// ══════════════════════════════════════════
-//  토글 버튼
-// ══════════════════════════════════════════
-function toggleLabel() {
-  showLabels = !showLabels;
-  labelSprites.forEach(s=>s.visible=showLabels);
-}
-
-function toggleGround() {
-  showGround = !showGround;
-  if(groundMesh) groundMesh.visible = showGround;
-  if(groundGrid) groundGrid.visible = showGround;
-  document.getElementById('btn-ground').style.opacity = showGround ? '1' : '0.5';
-}
-
-// ══════════════════════════════════════════
-//  유틸
-// ══════════════════════════════════════════
-function fmtB(v) {
-  if(v >= 1000000) return (v/1000000).toFixed(2)+'조원';
-  if(v >= 100000)  return (v/100000).toFixed(1)+'천억원';
-  if(v >= 10000)   return (v/10000).toFixed(0)+'백억원';
-  if(v >= 100)     return (v/100).toFixed(0)+'억원';
-  return v+'백만원';
-}
-
-// ══════════════════════════════════════════
-//  렌더 루프
-// ══════════════════════════════════════════
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-
-// ── 시작 ──
-init().catch(e=>{
-  document.getElementById('loading').innerHTML=`
-    <div style="color:#ef4444;text-align:center">
-      <div style="font-size:40px">⚠️</div>
-      <div style="margin-top:12px;color:#e2e8f0">${e.message}</div>
-      <div style="font-size:12px;color:#475569;margin-top:6px">map3d.json 파일을 확인하세요</div>
-    </div>`;
-});
 </script>
 </body>
 </html>
