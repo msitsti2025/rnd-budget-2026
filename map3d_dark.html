@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한 눈에 보는 2026년 정부 R&D 예산 — 3D 전략기술 맵</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:#0a0e1a;overflow:hidden;width:100vw;height:100vh}
+#loading{position:fixed;inset:0;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px}
+.spinner{width:44px;height:44px;border:3px solid #1e293b;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{color:#475569;font-size:14px}
+#canvas-wrap{position:fixed;inset:0}
+canvas{display:block}
+#topbar{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(10,14,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid #1e293b;display:flex;align-items:center;padding:0 18px;gap:14px;z-index:100;box-shadow:0 1px 8px rgba(0,0,0,.4)}
+.tb-icon{width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tb-title{font-size:14px;font-weight:700;color:#e2e8f0}
+.tb-sub{font-size:10px;color:#475569;margin-top:2px}
+.tb-div{width:1px;height:28px;background:#1e293b;margin:0 2px;flex-shrink:0}
+.tb-stat{text-align:center;flex-shrink:0}
+.tb-sv{font-size:15px;font-weight:700;color:#60a5fa}
+.tb-sl{font-size:10px;color:#475569}
+.tb-sp{flex:1}
+.tbtn{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #334155;color:#94a3b8;background:transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
+.tbtn:hover{border-color:#60a5fa;color:#60a5fa;background:rgba(96,165,250,.08)}
+.tbtn.on{background:rgba(96,165,250,.12);border-color:#60a5fa;color:#60a5fa}
+#legend{position:fixed;left:14px;top:62px;background:rgba(15,23,42,.90);backdrop-filter:blur(10px);border:1px solid #1e293b;border-radius:11px;padding:13px;width:192px;z-index:100;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.leg-sec{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;margin-top:9px}
+.leg-sec:first-child{margin-top:0}
+.leg-item{display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:2px 4px}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.leg-label{font-size:11px;color:#94a3b8;flex:1;line-height:1.3}
+.leg-cnt{font-size:10px;color:#475569;flex-shrink:0}
+.leg-sep{height:1px;background:#1e293b;margin:7px 0}
+.scale-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.scale-box{border-radius:2px;flex-shrink:0}
+.scale-text{font-size:10px;color:#475569}
+#tooltip{position:fixed;pointer-events:none;z-index:200;display:none;max-width:300px}
+.tt{background:rgba(15,23,42,.97);border:1px solid #334155;border-radius:10px;padding:13px;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.tt-name{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:7px;line-height:1.4}
+.tt-row{display:flex;justify-content:space-between;margin-bottom:3px;gap:10px}
+.tt-k{font-size:10px;color:#475569}.tt-v{font-size:10px;font-weight:600;color:#94a3b8}.tt-hi{color:#60a5fa}
+.tt-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.tt-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600;border:1px solid}
+.tt-blocks{margin-top:7px;border-top:1px solid #1e293b;padding-top:7px}
+.tt-bt{font-size:10px;color:#475569;margin-bottom:4px}
+.tt-br{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;gap:8px}
+.tt-bn{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.tt-bv{color:#60a5fa;font-weight:600;flex-shrink:0}
+#panel{position:fixed;right:14px;top:62px;width:268px;background:rgba(15,23,42,.95);backdrop-filter:blur(10px);border:1px solid #334155;border-radius:11px;padding:15px;z-index:100;display:none;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.pn-close{float:right;background:none;border:none;color:#475569;cursor:pointer;font-size:15px}
+.pn-close:hover{color:#94a3b8}
+.pn-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:9px;padding-right:20px;line-height:1.4}
+.pn-row{display:flex;justify-content:space-between;margin-bottom:5px}
+.pn-k{font-size:10px;color:#475569}.pn-v{font-size:10px;font-weight:600;color:#94a3b8}
+.pn-tags{display:flex;flex-wrap:wrap;gap:3px;margin:7px 0}
+.pn-tag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;border:1px solid}
+.pn-bsec{margin-top:9px;border-top:1px solid #1e293b;padding-top:9px}
+.pn-bsec-t{font-size:10px;color:#475569;margin-bottom:6px}
+.pn-brow{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.pn-bname{font-size:10px;color:#94a3b8;min-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pn-bwrap{flex:1;height:5px;background:#1e293b;border-radius:3px;overflow:hidden}
+.pn-bbar{height:100%;border-radius:3px}
+.pn-bval{font-size:10px;color:#60a5fa;font-weight:600;white-space:nowrap}
+#hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.85);border:1px solid #1e293b;border-radius:20px;padding:6px 16px;font-size:11px;color:#475569;z-index:100;white-space:nowrap;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="loading"><div class="spinner"></div><div class="load-text" id="ltxt">데이터 로딩 중...</div></div>
+<div id="topbar">
+  <div class="tb-icon">🔬</div>
+  <div>
+    <div class="tb-title">2026년 정부 R&D 예산 — 3D 전략기술 맵</div>
+    <div class="tb-sub">내부: 12대 국가전략기술 &nbsp;|&nbsp; 외부: 8대 정책분야 &nbsp;|&nbsp; 아메바 영역 = 빌딩 분포 &nbsp;|&nbsp; 빌딩 부피 ∝ 예산 &nbsp;|&nbsp; 과학기술혁신본부</div>
+  </div>
+  <div class="tb-div"></div>
+  <div class="tb-stat"><div class="tb-sv" id="s-b">-</div><div class="tb-sl">총예산(조)</div></div>
+  <div class="tb-stat"><div class="tb-sv" id="s-s">-</div><div class="tb-sl">세부사업</div></div>
+  <div class="tb-stat"><div class="tb-sv" id="s-d">-</div><div class="tb-sl">내역사업</div></div>
+  <div class="tb-sp"></div>
+  <button class="tbtn" onclick="resetCam()">📷 초기시점</button>
+  <button class="tbtn on" id="b-lbl" onclick="toggleLabels()">🏷 라벨</button>
+  <button class="tbtn on" id="b-pf"  onclick="togglePF()">🔵 정책분야</button>
+  <button class="tbtn on" id="b-none" onclick="toggleNone()">⬜ 미분류</button>
+</div>
+<div id="legend">
+  <div class="leg-sec">12대 국가전략기술</div><div id="leg-st"></div>
+  <div class="leg-sep"></div>
+  <div class="leg-sec">8대 정책분야</div><div id="leg-pf"></div>
+  <div class="leg-sep"></div>
+  <div class="leg-sec">기타</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#94a3b8"></div><div class="leg-label">미분류 (하단 집합)</div><div class="leg-cnt" id="leg-nc">-</div></div>
+  <div class="leg-sep"></div>
+  <div style="font-size:10px;color:#94a3b8;margin-bottom:6px">빌딩 부피 = 예산 규모</div>
+  <div id="leg-scale"></div>
+</div>
+<div id="canvas-wrap"></div>
+<div id="tooltip"><div class="tt" id="tt-in"></div></div>
+<div id="panel">
+  <button class="pn-close" onclick="closePanel()">&#x2715;</button>
+  <div class="pn-title" id="pn-title"></div>
+  <div id="pn-body"></div>
+</div>
+<div id="hint">🖱 드래그: 회전 &nbsp;|&nbsp; 휠: 줌 &nbsp;|&nbsp; 우클릭 드래그: 이동 &nbsp;|&nbsp; 빌딩 클릭: 상세보기</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── 전역 데이터 (JSON 로드 후 채워짐) ──
+let ST_NAMES=[], PF_NAMES=[], ST_COLORS=[], PF_COLORS=[];
+const NONE_COLOR='#94a3b8';
+
+function stColor(idx){ return ST_COLORS[idx]||NONE_COLOR; }
+function pfColor(idx){ return PF_COLORS[idx]||NONE_COLOR; }
+function bldgColor(b){
+  if(b.st_idx&&b.st_idx.length>0) return stColor(b.st_idx[0]);
+  if(b.pf_idx&&b.pf_idx.length>0) return pfColor(b.pf_idx[0]);
+  return NONE_COLOR;
+}
+
+let scene,camera,renderer;
+let buildingMeshes=[],labelObjs=[],pfObjs=[],noneObjs=[];
+let showLabels=true,showPF=true,showNone=true;
+const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2();
+let hovered=null;
+const orb={isRot:false,isPan:false,lx:0,ly:0,theta:0.2,phi:0.38,radius:1200,tgt:new THREE.Vector3()};
+
+async function init(){
+  setT('데이터 로딩...');
+  let D;
+  try {
+    const res = await fetch('map3d.json');
+    if(!res.ok) throw new Error('map3d.json HTTP ' + res.status);
+    D = await res.json();
+  } catch(e) {
+    showErr('JSON 로드 실패: ' + e.message);
+    return;
+  }
+
+  // 전역 상수 채우기
+  ST_NAMES  = D.st_names;
+  PF_NAMES  = D.pf_names;
+  ST_COLORS = D.st_colors;
+  PF_COLORS = D.pf_colors;
+
+  setT('씬 구성...');
+  try { setupScene(); setupLights(); } catch(e){ showErr('씬 오류: '+e.message); return; }
+
+  setT('영역 구성...');
+  try { setupGround(D); } catch(e){ showErr('지면 오류: '+e.message); return; }
+
+  setT('빌딩 생성...');
+  try { await buildCity(D.buildings, D.st_centers, D.pf_centers); } catch(e){ showErr('빌딩 오류: '+e.message); return; }
+
+  setupLegend(D);
+  setupStats(D.buildings);
+  setupEvents();
+  document.getElementById('loading').style.display='none';
+  animate();
+}
+
+function setT(t){ document.getElementById('ltxt').textContent=t; }
+function showErr(msg){
+  document.getElementById('loading').innerHTML=
+    '<div style="color:#dc2626;text-align:center;padding:40px">'+
+    '<div style="font-size:36px">&#9888;</div>'+
+    '<div style="color:#0f172a;margin-top:10px;font-size:14px">'+msg+'</div>'+
+    '<div style="color:#64748b;font-size:12px;margin-top:6px">map3d.html 과 map3d.json 을 같은 폴더에 두세요</div>'
+    '</div>';
+}
+
+function setupScene(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0a0e1a);
+  scene.fog=new THREE.Fog(0x0a0e1a,1800,3400);
+  camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,1,6000);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  document.getElementById('canvas-wrap').appendChild(renderer.domElement);
+  updateCam();
+  window.addEventListener('resize',()=>{
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+}
+
+function setupLights(){
+  scene.add(new THREE.AmbientLight(0x1e3050,2.8));
+  const sun=new THREE.DirectionalLight(0xffffff,1.6);
+  sun.position.set(700,1000,500); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-1400; sun.shadow.camera.right=1400;
+  sun.shadow.camera.top=1400;   sun.shadow.camera.bottom=-1400;
+  sun.shadow.camera.far=3200;
+  scene.add(sun);
+  const fill=new THREE.DirectionalLight(0x3b5a8a,0.7);
+  fill.position.set(-400,500,-300);
+  scene.add(fill);
+}
+
+// ── 아메바 영역 ──
+function makeAmoeba(pts, colorHex, fillOp, lineOp, yBase, objs){
+  if(!pts||pts.length<3) return;
+  const col=new THREE.Color(colorHex);
+  const shape=new THREE.Shape();
+  shape.moveTo(pts[0][0], pts[0][1]);
+  for(let i=1;i<pts.length;i++) shape.lineTo(pts[i][0], pts[i][1]);
+  shape.closePath();
+  const fillMesh=new THREE.Mesh(
+    new THREE.ShapeGeometry(shape),
+    new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:fillOp,side:THREE.DoubleSide,depthWrite:false})
+  );
+  fillMesh.rotation.x=-Math.PI/2; fillMesh.position.y=yBase;
+  if(objs) objs.push(fillMesh); scene.add(fillMesh);
+  const pts3d=pts.map(p=>new THREE.Vector3(p[0],yBase+0.5,p[1]));
+  pts3d.push(pts3d[0].clone());
+  const line=new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(pts3d),
+    new THREE.LineBasicMaterial({color:col,transparent:true,opacity:lineOp})
+  );
+  if(objs) objs.push(line); scene.add(line);
+}
+
+function setupGround(D){
+  const gm=new THREE.Mesh(new THREE.PlaneGeometry(3800,3800),
+    new THREE.MeshLambertMaterial({color:0x080d18}));
+  gm.rotation.x=-Math.PI/2; gm.receiveShadow=true; scene.add(gm);
+  const gh=new THREE.GridHelper(3800,150,0x131d2e,0x131d2e);
+  gh.position.y=0.2; scene.add(gh);
+
+  // ST 아메바 (인덱스 순서)
+  ST_NAMES.forEach((n,i)=>{
+    makeAmoeba(D.st_amoeba[i], ST_COLORS[i], 0.18, 0.80, 0.5, null);
+  });
+  // PF 아메바
+  PF_NAMES.forEach((n,i)=>{
+    makeAmoeba(D.pf_amoeba[i], PF_COLORS[i], 0.14, 0.68, 0.5, pfObjs);
+  });
+}
+
+async function buildCity(buildings, stCenters, pfCenters){
+  const CHUNK=50;
+  for(let i=0;i<buildings.length;i+=CHUNK){
+    buildings.slice(i,i+CHUNK).forEach(b=>createBuilding(b));
+    setT('빌딩 생성... '+Math.min(i+CHUNK,buildings.length)+' / '+buildings.length);
+    await new Promise(r=>setTimeout(r,0));
+  }
+  // ST 라벨
+  ST_NAMES.forEach((n,i)=>{
+    const sp=makeSprite(n, ST_COLORS[i], 46);
+    sp.position.set(stCenters[i][0], 14, stCenters[i][1]);
+    labelObjs.push(sp); scene.add(sp);
+  });
+  // PF 라벨
+  PF_NAMES.forEach((n,i)=>{
+    const sp=makeSprite(n, PF_COLORS[i], 38);
+    sp.position.set(pfCenters[i][0], 14, pfCenters[i][1]);
+    labelObjs.push(sp); pfObjs.push(sp); scene.add(sp);
+  });
+  // 미분류 라벨
+  const ns=makeSprite('미 분 류', NONE_COLOR, 36);
+  ns.position.set(0,14,950); labelObjs.push(ns); noneObjs.push(ns); scene.add(ns);
+}
+
+function createBuilding(b){
+  const group=new THREE.Group();
+  group.position.set(b.x,0,b.z);
+  group.userData=b;
+  const baseHex=bldgColor(b);
+  const bw=b.bw, bh=b.bh;
+  const blocks=b.blocks;
+  const totBud=blocks.reduce((s,bl)=>s+bl.budget,0)||1;
+  let yOff=0;
+  blocks.forEach((bl,i)=>{
+    const h=Math.max(0.3,(bl.budget/totBud)*bh);
+    const t=blocks.length<=1?0:i/(blocks.length-1);
+    const col=new THREE.Color(baseHex);
+    col.lerp(new THREE.Color(0xffffff), 0.30*t);
+    const mesh=new THREE.Mesh(
+      new THREE.BoxGeometry(bw,h,bw),
+      new THREE.MeshLambertMaterial({color:col})
+    );
+    mesh.position.y=yOff+h/2;
+    mesh.castShadow=true; mesh.receiveShadow=true;
+    mesh.userData={building:b};
+    group.add(mesh); yOff+=h;
+  });
+  const edgeCol=new THREE.Color(baseHex); edgeCol.multiplyScalar(0.6);
+  const edgeMat=new THREE.LineBasicMaterial({color:edgeCol,transparent:true,opacity:0.5});
+  const edge=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(bw+0.3,bh+0.2,bw+0.3)), edgeMat
+  );
+  edge.position.y=bh/2; group.add(edge);
+  scene.add(group);
+  buildingMeshes.push({group,data:b,edgeMat,baseHex});
+  if(!b.has_st&&!b.has_pf) noneObjs.push(group);
+}
+
+function makeSprite(text,color,size){
+  const c=document.createElement('canvas'); c.width=512; c.height=128;
+  const ctx=c.getContext('2d'); ctx.clearRect(0,0,512,128);
+  ctx.font='bold '+size+'px Noto Sans KR,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=8;
+  ctx.strokeText(text,256,64);
+  ctx.fillStyle=color; ctx.fillText(text,256,64);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({
+    map:new THREE.CanvasTexture(c),transparent:true,depthTest:false
+  }));
+  sp.scale.set(110,28,1); return sp;
+}
+
+function setupLegend(D){
+  const stC=new Array(ST_NAMES.length).fill(0);
+  const pfC=new Array(PF_NAMES.length).fill(0);
+  D.buildings.forEach(b=>{
+    (b.st_idx||[]).forEach(i=>stC[i]++);
+    (b.pf_idx||[]).forEach(i=>pfC[i]++);
+  });
+  const noneC=D.buildings.filter(b=>!b.has_st&&!b.has_pf).length;
+  const stEl=document.getElementById('leg-st');
+  ST_NAMES.forEach((n,i)=>{
+    const d=document.createElement('div'); d.className='leg-item';
+    d.innerHTML='<div class="leg-dot" style="background:'+ST_COLORS[i]+'"></div><div class="leg-label">'+n+'</div><div class="leg-cnt">'+stC[i]+'</div>';
+    stEl.appendChild(d);
+  });
+  const pfEl=document.getElementById('leg-pf');
+  PF_NAMES.forEach((n,i)=>{
+    const d=document.createElement('div'); d.className='leg-item';
+    d.innerHTML='<div class="leg-dot" style="background:'+PF_COLORS[i]+'"></div><div class="leg-label">'+n+'</div><div class="leg-cnt">'+pfC[i]+'</div>';
+    pfEl.appendChild(d);
+  });
+  document.getElementById('leg-nc').textContent=noneC;
+  const sc=document.getElementById('leg-scale');
+  [{l:'1조원이상',w:22,h:18,c:'#e63946'},{l:'1000억',w:16,h:13,c:'#2a9d8f'},{l:'100억',w:10,h:8,c:'#118ab2'},{l:'10억이하',w:5,h:4,c:'#94a3b8'}].forEach(s=>{
+    const r=document.createElement('div'); r.className='scale-row';
+    r.innerHTML='<div class="scale-box" style="width:'+s.w+'px;height:'+s.h+'px;background:'+s.c+'"></div><div class="scale-text">'+s.l+'</div>';
+    sc.appendChild(r);
+  });
+}
+
+function setupStats(buildings){
+  document.getElementById('s-b').textContent=(buildings.reduce((s,r)=>s+r.budget,0)/1000000).toFixed(2);
+  document.getElementById('s-s').textContent=buildings.length.toLocaleString();
+  document.getElementById('s-d').textContent=buildings.reduce((s,r)=>s+r.blocks.length,0).toLocaleString();
+}
+
+function setupEvents(){
+  const el=renderer.domElement;
+  el.addEventListener('mousedown',e=>{if(e.button===0)orb.isRot=true;if(e.button===2)orb.isPan=true;orb.lx=e.clientX;orb.ly=e.clientY;});
+  el.addEventListener('mousemove',e=>{
+    const dx=e.clientX-orb.lx, dy=e.clientY-orb.ly;
+    orb.lx=e.clientX; orb.ly=e.clientY;
+    if(orb.isRot){orb.theta-=dx*0.003;orb.phi=Math.max(0.05,Math.min(Math.PI/2-0.01,orb.phi-dy*0.003));updateCam();}
+    if(orb.isPan){
+      const right=new THREE.Vector3();
+      right.crossVectors(camera.getWorldDirection(new THREE.Vector3()),new THREE.Vector3(0,1,0)).normalize();
+      orb.tgt.addScaledVector(right,-dx*orb.radius*0.0009);
+      orb.tgt.y+=dy*orb.radius*0.0009; updateCam();
+    }
+    mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+    handleHover(e);
+  });
+  el.addEventListener('mouseup',()=>{orb.isRot=false;orb.isPan=false;});
+  el.addEventListener('wheel',e=>{orb.radius=Math.max(80,Math.min(3400,orb.radius*(1+e.deltaY*0.001)));updateCam();},{passive:true});
+  el.addEventListener('click',handleClick);
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function updateCam(){
+  const{theta,phi,radius,tgt}=orb;
+  camera.position.set(tgt.x+radius*Math.sin(phi)*Math.sin(theta),tgt.y+radius*Math.cos(phi),tgt.z+radius*Math.sin(phi)*Math.cos(theta));
+  camera.lookAt(tgt);
+}
+function resetCam(){orb.theta=0.2;orb.phi=0.38;orb.radius=1200;orb.tgt.set(0,0,0);updateCam();}
+function getMeshes(){const m=[];buildingMeshes.forEach(bm=>bm.group.children.forEach(c=>{if(c.isMesh)m.push(c);}));return m;}
+
+function handleHover(e){
+  raycaster.setFromCamera(mouse,camera);
+  const hits=raycaster.intersectObjects(getMeshes());
+  const tt=document.getElementById('tooltip');
+  if(hits.length&&hits[0].object.userData.building){
+    const b=hits[0].object.userData.building;
+    if(hovered!==b.id){if(hovered)highlight(hovered,false);hovered=b.id;highlight(b.id,true);}
+    const stT=(b.st_idx||[]).map(i=>'<span class="tt-tag" style="background:'+ST_COLORS[i]+'22;color:'+ST_COLORS[i]+';border-color:'+ST_COLORS[i]+'66">'+ST_NAMES[i]+'</span>').join('');
+    const pfT=(b.pf_idx||[]).map(i=>'<span class="tt-tag" style="background:'+PF_COLORS[i]+'22;color:'+PF_COLORS[i]+';border-color:'+PF_COLORS[i]+'66">'+PF_NAMES[i]+'</span>').join('');
+    const bls=b.blocks.slice(0,4).map(bl=>'<div class="tt-br"><span class="tt-bn">'+bl.name+'</span><span class="tt-bv">'+fmtB(bl.budget)+'</span></div>').join('');
+    const more=b.blocks.length-4;
+    document.getElementById('tt-in').innerHTML=
+      '<div class="tt-name">'+b.name+'</div>'+
+      '<div class="tt-row"><span class="tt-k">부처</span><span class="tt-v">'+b.ministry+'</span></div>'+
+      '<div class="tt-row"><span class="tt-k">예산</span><span class="tt-v tt-hi">'+fmtB(b.budget)+'</span></div>'+
+      '<div class="tt-row"><span class="tt-k">내역사업</span><span class="tt-v">'+b.blocks.length+'개</span></div>'+
+      '<div class="tt-tags">'+stT+pfT+((!stT&&!pfT)?'<span style="color:#94a3b8;font-size:10px">미분류</span>':'')+'</div>'+
+      (b.blocks.length>1?'<div class="tt-blocks"><div class="tt-bt">내역사업</div>'+bls+(more>0?'<div style="font-size:9px;color:#94a3b8">+ '+more+'개 더...</div>':'')+'</div>':'');
+    tt.style.display='block';
+    tt.style.left=Math.min(e.clientX+14,innerWidth-320)+'px';
+    tt.style.top=Math.min(e.clientY-10,innerHeight-300)+'px';
+    renderer.domElement.style.cursor='pointer';
+  }else{
+    if(hovered){highlight(hovered,false);hovered=null;}
+    tt.style.display='none'; renderer.domElement.style.cursor='default';
+  }
+}
+function handleClick(){raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(getMeshes());if(hits.length&&hits[0].object.userData.building)showPanel(hits[0].object.userData.building);}
+function highlight(id,on){
+  buildingMeshes.forEach(bm=>{
+    if(bm.data.id===id){
+      bm.group.children.forEach(c=>{if(c.isMesh)c.material.emissive=on?new THREE.Color(0x404040):new THREE.Color(0);});
+      bm.edgeMat.opacity=on?0.95:0.5;
+    }
+  });
+}
+function showPanel(b){
+  document.getElementById('pn-title').textContent=b.name;
+  const maxBl=Math.max(...b.blocks.map(bl=>bl.budget));
+  const baseHex=bldgColor(b);
+  const stT=(b.st_idx||[]).map(i=>'<span class="pn-tag" style="background:'+ST_COLORS[i]+'20;color:'+ST_COLORS[i]+';border-color:'+ST_COLORS[i]+'55">'+ST_NAMES[i]+'</span>').join('');
+  const pfT=(b.pf_idx||[]).map(i=>'<span class="pn-tag" style="background:'+PF_COLORS[i]+'20;color:'+PF_COLORS[i]+';border-color:'+PF_COLORS[i]+'55">'+PF_NAMES[i]+'</span>').join('');
+  const bls=b.blocks.map((bl,i)=>{
+    const t=b.blocks.length<=1?0:i/(b.blocks.length-1);
+    const col=new THREE.Color(baseHex); col.lerp(new THREE.Color(0xffffff),0.30*t);
+    return '<div class="pn-brow"><div class="pn-bname" title="'+bl.name+'">'+bl.name+'</div><div class="pn-bwrap"><div class="pn-bbar" style="width:'+(maxBl>0?bl.budget/maxBl*100:0)+'%;background:#'+col.getHexString()+'"></div></div><div class="pn-bval">'+fmtB(bl.budget)+'</div></div>';
+  }).join('');
+  document.getElementById('pn-body').innerHTML=
+    '<div class="pn-row"><span class="pn-k">부처</span><span class="pn-v">'+b.ministry+'</span></div>'+
+    '<div class="pn-row"><span class="pn-k">전문위</span><span class="pn-v">'+b.committee+'</span></div>'+
+    '<div class="pn-row"><span class="pn-k">총 예산</span><span class="pn-v" style="color:#2563eb;font-size:12px">'+fmtB(b.budget)+'</span></div>'+
+    '<div class="pn-tags">'+stT+pfT+((!stT&&!pfT)?'<span style="color:#94a3b8;font-size:11px">미분류</span>':'')+'</div>'+
+    (b.blocks.length>1?'<div class="pn-bsec"><div class="pn-bsec-t">내역사업 구성 ('+b.blocks.length+'개)</div>'+bls+'</div>':'');
+  document.getElementById('panel').style.display='block';
+}
+function closePanel(){document.getElementById('panel').style.display='none';}
+function toggleLabels(){showLabels=!showLabels;labelObjs.forEach(o=>o.visible=showLabels);document.getElementById('b-lbl').classList.toggle('on',showLabels);}
+function togglePF(){showPF=!showPF;pfObjs.forEach(o=>o.visible=showPF);document.getElementById('b-pf').classList.toggle('on',showPF);}
+function toggleNone(){showNone=!showNone;noneObjs.forEach(o=>o.visible=showNone);document.getElementById('b-none').classList.toggle('on',showNone);}
+function fmtB(v){if(v>=1000000)return(v/1000000).toFixed(2)+'조원';if(v>=100000)return(v/100000).toFixed(1)+'천억원';if(v>=10000)return(v/10000).toFixed(0)+'백억원';if(v>=100)return(v/100).toFixed(0)+'억원';return v+'백만원';}
+function animate(){requestAnimationFrame(animate);renderer.render(scene,camera);}
+
+init();
+</script>
+</body>
+</html>
