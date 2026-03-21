@@ -173,6 +173,9 @@ tr:hover td{background:#f8fbff}
 .treemap-cell.tiny .treemap-cell-name{font-size:10px}
 .treemap-cell.tiny .treemap-cell-val,.treemap-cell.tiny .treemap-cell-pct{display:none}
 
+/* SECTION DIVIDER */
+.section-divider{font-size:14px;font-weight:700;color:var(--text2);padding:10px 0 4px;border-bottom:2px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+
 @media(max-width:1200px){
   .main-layout{grid-template-columns:1fr}
   .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -210,13 +213,9 @@ tr:hover td{background:#f8fbff}
 
 <div class="tab-bar">
   <div class="tab-bar-inner">
-    <button class="tab-btn active"  onclick="switchTab('overview')">📊 종합 현황</button>
-    <button class="tab-btn core10"  onclick="switchTab('core10')">🎯 10대 핵심투자분야</button>
-    <button class="tab-btn"         onclick="switchTab('strategic')">🔬 국가전략기술</button>
-    <button class="tab-btn"         onclick="switchTab('policy')">📋 정책분야</button>
-    <button class="tab-btn"         onclick="switchTab('ministry')">🏛 부처별 현황</button>
-    <button class="tab-btn"         onclick="switchTab('list')">📄 세부·내역사업 목록</button>
-    <button class="tab-btn"         onclick="switchTab('map3d')" style="color:#f59e0b">🏙 3D 맵</button>
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 종합 현황</button>
+    <button class="tab-btn"        onclick="switchTab('list')">📄 세부·내역사업 목록</button>
+    <button class="tab-btn" style="color:#f59e0b;margin-left:auto" onclick="window.open('map3d.html','_blank')">🏙 3D 맵 ↗</button>
   </div>
 </div>
 
@@ -249,8 +248,10 @@ tr:hover td{background:#f8fbff}
   <!-- CONTENT -->
   <main class="content">
 
-    <!-- ① 종합 현황 -->
+    <!-- ① 종합 현황 (모든 내용 통합) -->
     <div class="tab-panel active" id="panel-overview">
+
+      <!-- KPI -->
       <div class="kpi-row">
         <div class="kpi-card blue">
           <div class="kpi-label">필터 적용 총 예산</div>
@@ -273,50 +274,31 @@ tr:hover td{background:#f8fbff}
           <div class="kpi-sub" id="k-st-pct"></div>
         </div>
       </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#2563eb"></div>국가전략기술별 예산</div>
-          <div class="chart-wrap"><canvas id="ov-st-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>정책분야별 예산</div>
-          <div class="chart-wrap"><canvas id="ov-pf-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#059669"></div>부처별 R&D 예산 TOP 15</div>
-          <div class="chart-wrap tall"><canvas id="ov-min-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#d97706"></div>전문위원회별 예산</div>
-          <div class="chart-wrap tall"><canvas id="ov-com-chart"></canvas></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- ② 10대 핵심투자분야 -->
-    <div class="tab-panel" id="panel-core10">
-      <div style="background:#fff;border:1px solid #ddd6fe;border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow)">
-        <div style="font-size:12px;font-weight:600;color:#6d28d9;margin-bottom:4px">💡 10대 핵심투자분야란?</div>
+      <!-- 섹션 구분선 스타일 -->
+      <div class="section-divider">🎯 10대 핵심투자분야</div>
+
+      <!-- 10대 핵심투자분야 설명 -->
+      <div style="background:#fff;border:1px solid #ddd6fe;border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow)">
         <div style="font-size:11px;color:var(--text3);line-height:1.7">
-          12대 국가전략기술과 8대 정책분야를 재편한 새로운 분류체계입니다.
-          <b style="color:#7c3aed">전략기술</b>은 I~T열(12대 전략기술) 배정액 합계와 H열(세부사업 예산) 중 작은 값을 사용하며(중복 방지),
-          <b style="color:#7c3aed">에너지</b>는 정책분야 탄소중립 예산과 동일합니다.
-          나머지 분야는 해당 정책분야 또는 전략기술 예산과 동일합니다.
+          12대 국가전략기술과 8대 정책분야를 재편한 분류체계 &nbsp;|&nbsp;
+          <b style="color:#7c3aed">전략기술</b>: I~T열 합계와 H열 예산 중 작은 값 사용(중복방지) &nbsp;|&nbsp;
+          <b style="color:#7c3aed">에너지</b>: 정책분야 탄소중립과 동일
         </div>
       </div>
       <div class="core10-grid" id="core10-cards"></div>
-      <div class="chart-card wide">
-        <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>10대 핵심투자분야별 예산 현황 (백만원)</div>
-        <div class="chart-wrap tall"><canvas id="core10-bar-chart"></canvas></div>
-      </div>
       <div class="charts-grid">
         <div class="chart-card wide">
           <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>10대 핵심투자분야 예산 트리맵 <span style="font-size:11px;color:var(--text4);font-weight:400;margin-left:6px">· 박스 크기 ∝ 예산 규모</span></div>
           <div class="treemap-container" id="core10-treemap"></div>
         </div>
         <div class="chart-card">
+          <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>10대 핵심투자분야별 예산 현황</div>
+          <div class="chart-wrap tall"><canvas id="core10-bar-chart"></canvas></div>
+        </div>
+        <div class="chart-card">
           <div class="chart-title"><div class="chart-title-dot" style="background:#059669"></div>핵심투자분야 × 부처 (상위 10)</div>
-          <div class="chart-wrap"><canvas id="core10-min-chart"></canvas></div>
+          <div class="chart-wrap tall"><canvas id="core10-min-chart"></canvas></div>
         </div>
       </div>
       <div class="table-card">
@@ -325,23 +307,15 @@ tr:hover td{background:#f8fbff}
           <div class="table-meta"><span class="badge badge-purple">10개 분야</span></div>
         </div>
         <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th class="nosort">번호</th>
-              <th class="nosort">핵심투자분야</th>
-              <th class="nosort">분류 기준</th>
-              <th class="nosort" style="text-align:right">예산 (백만원)</th>
-              <th class="nosort" style="text-align:right">비율</th>
-              <th class="nosort">규모</th>
-            </tr></thead>
-            <tbody id="core10-table-body"></tbody>
-          </table>
+          <table><thead><tr>
+            <th class="nosort">번호</th><th class="nosort">핵심투자분야</th><th class="nosort">분류 기준</th>
+            <th class="nosort" style="text-align:right">예산 (백만원)</th><th class="nosort" style="text-align:right">비율</th><th class="nosort">규모</th>
+          </tr></thead><tbody id="core10-table-body"></tbody></table>
         </div>
       </div>
-    </div>
 
-    <!-- ③ 국가전략기술 -->
-    <div class="tab-panel" id="panel-strategic">
+      <!-- 국가전략기술 섹션 -->
+      <div class="section-divider">🔬 국가전략기술</div>
       <div class="kpi-row" id="st-kpi-row"></div>
       <div class="chart-card wide">
         <div class="chart-title"><div class="chart-title-dot" style="background:#2563eb"></div>국가전략기술 12개 분야별 예산 현황 (백만원)</div>
@@ -363,22 +337,18 @@ tr:hover td{background:#f8fbff}
           <div class="table-meta"><span class="badge badge-blue" id="st-table-count"></span></div>
         </div>
         <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th class="nosort">전략기술</th>
-              <th onclick="stSortBy('count')" id="st-th-count">세부사업 수</th>
-              <th onclick="stSortBy('budget')" id="st-th-budget">총 예산 ▼</th>
-              <th onclick="stSortBy('avg')" id="st-th-avg">평균 예산</th>
-              <th class="nosort">점유율</th>
-            </tr></thead>
-            <tbody id="st-table-body"></tbody>
-          </table>
+          <table><thead><tr>
+            <th class="nosort">전략기술</th>
+            <th onclick="stSortBy('count')" id="st-th-count">세부사업 수</th>
+            <th onclick="stSortBy('budget')" id="st-th-budget">총 예산 ▼</th>
+            <th onclick="stSortBy('avg')" id="st-th-avg">평균 예산</th>
+            <th class="nosort">점유율</th>
+          </tr></thead><tbody id="st-table-body"></tbody></table>
         </div>
       </div>
-    </div>
 
-    <!-- ④ 정책분야 -->
-    <div class="tab-panel" id="panel-policy">
+      <!-- 정책분야 섹션 -->
+      <div class="section-divider">📋 정책분야</div>
       <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>정책분야별 예산 비율</div>
@@ -395,22 +365,16 @@ tr:hover td{background:#f8fbff}
           <div class="table-meta"><span class="badge badge-blue" id="pf-table-count"></span></div>
         </div>
         <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th class="nosort">정책분야</th>
-              <th class="nosort">세부사업 수</th>
-              <th class="nosort" style="text-align:right">총 예산 (백만원)</th>
-              <th class="nosort">점유율</th>
-              <th class="nosort" style="text-align:right">평균 예산</th>
-            </tr></thead>
-            <tbody id="pf-table-body"></tbody>
-          </table>
+          <table><thead><tr>
+            <th class="nosort">정책분야</th><th class="nosort">세부사업 수</th>
+            <th class="nosort" style="text-align:right">총 예산 (백만원)</th>
+            <th class="nosort">점유율</th><th class="nosort" style="text-align:right">평균 예산</th>
+          </tr></thead><tbody id="pf-table-body"></tbody></table>
         </div>
       </div>
-    </div>
 
-    <!-- ⑤ 부처별 현황 -->
-    <div class="tab-panel" id="panel-ministry">
+      <!-- 부처별 현황 섹션 -->
+      <div class="section-divider">🏛 부처별 현황</div>
       <div class="chart-card">
         <div class="chart-title"><div class="chart-title-dot" style="background:#059669"></div>부처별 R&D 예산 현황 (전체)</div>
         <div class="chart-wrap" style="height:480px"><canvas id="min-full-chart"></canvas></div>
@@ -421,23 +385,18 @@ tr:hover td{background:#f8fbff}
           <div class="table-meta"><span class="badge badge-blue" id="min-table-count"></span></div>
         </div>
         <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th class="nosort">순위</th>
-              <th class="nosort">부처명</th>
-              <th class="nosort">세부사업</th>
-              <th class="nosort">내역사업</th>
-              <th class="nosort" style="text-align:right">총 예산 (백만원)</th>
-              <th class="nosort">점유율</th>
-              <th class="nosort">주요 전략기술</th>
-            </tr></thead>
-            <tbody id="min-table-body"></tbody>
-          </table>
+          <table><thead><tr>
+            <th class="nosort">순위</th><th class="nosort">부처명</th>
+            <th class="nosort">세부사업</th><th class="nosort">내역사업</th>
+            <th class="nosort" style="text-align:right">총 예산 (백만원)</th>
+            <th class="nosort">점유율</th><th class="nosort">주요 전략기술</th>
+          </tr></thead><tbody id="min-table-body"></tbody></table>
         </div>
       </div>
+
     </div>
 
-    <!-- ⑥ 세부·내역사업 목록 -->
+    <!-- ② 세부·내역사업 목록 -->
     <div class="tab-panel" id="panel-list">
       <div class="kpi-row">
         <div class="kpi-card blue">
@@ -484,18 +443,6 @@ tr:hover td{background:#f8fbff}
         </div>
         <div class="pagination" id="list-pagination"></div>
       </div>
-    </div>
-
-    <!-- ⑦ 3D 맵 -->
-    <div class="tab-panel" id="panel-map3d" style="gap:0">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)">
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--text)">2026년 정부 R&D 예산 - 3D 맵</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:3px">12대 국가전략기술 × 8대 정책분야 아메바 영역 · 빌딩 부피 ∝ 예산 · 내역사업 = 블록 · 과학기술혁신본부</div>
-        </div>
-        <a href="map3d.html" target="_blank" style="padding:7px 16px;background:var(--accent2);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;flex-shrink:0;margin-left:16px">새 창으로 열기 ↗</a>
-      </div>
-      <iframe id="map3d-frame" src="" style="width:100%;height:calc(100vh - 180px);border:1px solid var(--border);border-radius:var(--radius);background:#0a0e1a;display:block" loading="lazy"></iframe>
     </div>
 
   </main>
@@ -581,17 +528,12 @@ function initUI(){
 // ══════════════════════════════════════════
 //  탭 전환
 // ══════════════════════════════════════════
-const TAB_IDS=['overview','core10','strategic','policy','ministry','list','map3d'];
+const TAB_IDS=['overview','list'];
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',TAB_IDS[i]===tab));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+tab).classList.add('active');
-  // 3D 맵 탭: iframe을 처음 열 때만 src 설정 (lazy load)
-  if(tab==='map3d'){
-    const fr=document.getElementById('map3d-frame');
-    if(!fr.src||fr.src==='about:blank'||fr.src==='') fr.src='map3d.html';
-  }
   renderCurrentTab();
 }
 
@@ -662,12 +604,8 @@ function applyFilters(){
 
 function renderCurrentTab(){
   switch(currentTab){
-    case 'overview':  renderOverview(); break;
-    case 'core10':    renderCore10();   break;
-    case 'strategic': renderStrategic();break;
-    case 'policy':    renderPolicy();   break;
-    case 'ministry':  renderMinistry(); break;
-    case 'list':      renderList();     break;
+    case 'overview': renderOverview(); break;
+    case 'list':     renderList();     break;
   }
 }
 
@@ -694,10 +632,16 @@ function barY(v){
   return v+'백만';
 }
 
-// ══════════════════════════════════════════
-//  ① 종합 현황
-// ══════════════════════════════════════════
+// ══ ① 종합 현황 (모든 섹션 통합 렌더링) ══
 function renderOverview(){
+  renderOverviewKPI();
+  renderCore10();
+  renderStrategic();
+  renderPolicy();
+  renderMinistry();
+}
+
+function renderOverviewKPI(){
   const tb=allData.reduce((s,r)=>s+r.budget,0);
   const fb=filtered.reduce((s,r)=>s+r.budget,0);
   const fc=filtered.length;
@@ -712,24 +656,6 @@ function renderOverview(){
   document.getElementById('k-detail-avg').textContent=`세부사업당 평균 ${fc?(fd/fc).toFixed(1):0}개`;
   document.getElementById('k-st-budget').innerHTML=`${(stBud/1000000).toFixed(2)}<span class="kpi-unit">조원</span>`;
   document.getElementById('k-st-pct').textContent=`전체 예산 대비 ${pct(stBud,fb)}`;
-
-  const stD=ST_NAMES.map(n=>filtered.reduce((s,r)=>s+(r.strategic[n]||0),0));
-  mkChart('ov-st-chart',{type:'bar',data:{labels:ST_NAMES,datasets:[{data:stD,backgroundColor:ST_COLORS.map(c=>c+'33'),borderColor:ST_COLORS,borderWidth:1.5,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtBudget(c.raw)}}},
-    scales:{x:{ticks:{color:TC,font:{size:10}},grid:GRID},y:{ticks:{color:TC,font:{size:10},callback:barY},grid:GRID}}}});
-
-  const pfD=PF_NAMES.map(n=>filtered.reduce((s,r)=>s+(r.policy[n]||0),0));
-  mkChart('ov-pf-chart',{type:'doughnut',data:{labels:PF_NAMES,datasets:[{data:pfD,backgroundColor:PF_COLORS,borderColor:'#fff',borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#334155',font:{size:11},padding:8,boxWidth:12}},
-    tooltip:{callbacks:{label:c=>`${c.label}: ${fmtBudget(c.raw)} (${pct(c.raw,c.dataset.data.reduce((a,b)=>a+b,0))})`}}}}});
-
-  const mMap={};filtered.forEach(r=>{mMap[r.ministry]=(mMap[r.ministry]||0)+r.budget;});
-  const mE=Object.entries(mMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
-  mkChart('ov-min-chart',hbarCfg(mE.map(e=>e[0]),mE.map(e=>e[1]),ST_COLORS));
-
-  const cMap={};filtered.forEach(r=>{cMap[r.committee]=(cMap[r.committee]||0)+r.budget;});
-  const cE=Object.entries(cMap).sort((a,b)=>b[1]-a[1]);
-  mkChart('ov-com-chart',hbarCfg(cE.map(e=>e[0]),cE.map(e=>e[1]),PF_COLORS));
 }
 
 function hbarCfg(labels,data,colors){
