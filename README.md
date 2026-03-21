@@ -1,8 +1,8 @@
-# 2026 국가 R&D 예산 분석 플랫폼
+# 한 눈에 보느 2026년 정부 R&D 예산
 
-> 2026년 국가연구개발사업 세부사업 예산을 국가전략기술 분류 체계 기준으로 분석하는 인터랙티브 웹 플랫폼
+> 2026년 국가연구개발사업 세부사업 예산을 10대 핵심투자분야 위주로 보여준다.
 
-🔗 **라이브 데모**: [https://[username].github.io/rnd-budget-2026/](https://[username].github.io/rnd-budget-2026/)
+🔗 **라이브 데모**: [https://msitsti2025.github.io/rnd-budget-2026/](https://msitsti2025.github.io/rnd-budget-2026/)
 
 ---
 
@@ -69,7 +69,3 @@ git push -u origin main
 
 본 플랫폼의 코드는 MIT License를 따릅니다.  
 데이터는 공공데이터 이용 정책을 따릅니다.
-
----
-
-*Inspired by [KAIB2026](https://hollobit.github.io/KAIB2026/) — 국가 AI 예산 분석 플랫폼*
