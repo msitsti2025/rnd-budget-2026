@@ -168,7 +168,7 @@ function setupLights(){
   sun.shadow.camera.left=-1300;sun.shadow.camera.right=1300;
   sun.shadow.camera.top=1300;sun.shadow.camera.bottom=-1300;
   sun.shadow.camera.far=3000;scene.add(sun);
-  scene.add(Object.assign(new THREE.DirectionalLight(0xbfd4f0,0.6),{position:new THREE.Vector3(-400,500,-300)}));
+  const fill2=new THREE.DirectionalLight(0xbfd4f0,0.6);fill2.position.set(-400,500,-300);scene.add(fill2);
 }
 
 // ── 사각형 영역 그리기 유틸 ──
