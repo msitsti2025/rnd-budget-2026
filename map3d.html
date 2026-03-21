@@ -103,7 +103,7 @@ canvas{display:block}
   <div class="pn-title" id="pn-title"></div>
   <div id="pn-body"></div>
 </div>
-<div id="hint">🖱 드래그: 회전 &nbsp;|&nbsp; 휠: 줌 &nbsp;|&nbsp; 우클릭 드래그: 이동 &nbsp;|&nbsp; 빌딩 클릭: 상세보기</div>
+<div id="hint">🖱 드래그: 회전 &nbsp;|&nbsp; 휠: 줌 &nbsp;|&nbsp; 우클릭 드래그: 이동 &nbsp;|&nbsp; 클릭: 상세보기 &nbsp;|&nbsp; 📱 한 손가락 드래그: 회전 &nbsp;|&nbsp; 두 손가락 핀치: 줌 &nbsp;|&nbsp; 탭: 상세보기</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -177,7 +177,7 @@ function setupScene(){
   camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,1,6000);
   renderer=new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   document.getElementById('canvas-wrap').appendChild(renderer.domElement);
@@ -370,6 +370,65 @@ function setupEvents(){
   el.addEventListener('wheel',e=>{orb.radius=Math.max(80,Math.min(3400,orb.radius*(1+e.deltaY*0.001)));updateCam();},{passive:true});
   el.addEventListener('click',handleClick);
   el.addEventListener('contextmenu',e=>e.preventDefault());
+
+  // ── 터치 이벤트 (iPad / 모바일) ──
+  let touch0=null, touch1=null, pinchDist0=0, tapTimer=null, tapPos=null;
+
+  function getTouchDist(a,b){
+    return Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+  }
+
+  el.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===1){
+      touch0={x:e.touches[0].clientX, y:e.touches[0].clientY};
+      orb.lx=touch0.x; orb.ly=touch0.y;
+      orb.isRot=true;
+      // 탭 감지용
+      tapPos={x:touch0.x, y:touch0.y};
+      tapTimer=setTimeout(()=>tapPos=null, 300);
+    } else if(e.touches.length===2){
+      orb.isRot=false;
+      pinchDist0=getTouchDist(e.touches[0],e.touches[1]);
+      touch0={x:(e.touches[0].clientX+e.touches[1].clientX)/2, y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+    }
+  },{passive:false});
+
+  el.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===1 && orb.isRot){
+      const x=e.touches[0].clientX, y=e.touches[0].clientY;
+      const dx=x-orb.lx, dy2=y-orb.ly;
+      orb.lx=x; orb.ly=y;
+      orb.theta-=dx*0.004;
+      orb.phi=Math.max(0.05,Math.min(Math.PI/2-0.01,orb.phi-dy2*0.004));
+      updateCam();
+      // 탭 판정 취소 (움직임 감지)
+      if(tapPos && (Math.abs(x-tapPos.x)>8||Math.abs(y-tapPos.y)>8)){
+        tapPos=null; clearTimeout(tapTimer);
+      }
+    } else if(e.touches.length===2){
+      const dist=getTouchDist(e.touches[0],e.touches[1]);
+      const scale=pinchDist0/dist;
+      orb.radius=Math.max(80,Math.min(3400,orb.radius*scale));
+      pinchDist0=dist;
+      updateCam();
+    }
+  },{passive:false});
+
+  el.addEventListener('touchend',e=>{
+    e.preventDefault();
+    orb.isRot=false;
+    // 탭으로 빌딩 클릭
+    if(tapPos && e.changedTouches.length===1){
+      clearTimeout(tapTimer);
+      const t=e.changedTouches[0];
+      mouse.x=(t.clientX/innerWidth)*2-1;
+      mouse.y=-(t.clientY/innerHeight)*2+1;
+      handleClick();
+    }
+    tapPos=null; touch0=null; touch1=null;
+  },{passive:false});
 }
 function updateCam(){
   const{theta,phi,radius,tgt}=orb;
