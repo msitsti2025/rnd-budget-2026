@@ -214,12 +214,12 @@ tr:hover td{background:#f8fbff}
 
 <div class="tab-bar">
   <div class="tab-bar-inner">
-    <button class="tab-btn active" onclick="switchTab('overview')">📊 종합 현황</button>
-    <button class="tab-btn core10"  onclick="switchTab('core10')">🎯 10대 핵심투자분야</button>
-    <button class="tab-btn"         onclick="switchTab('strategic')">🔬 국가전략기술</button>
-    <button class="tab-btn"         onclick="switchTab('policy')">📋 정책분야</button>
-    <button class="tab-btn"         onclick="switchTab('ministry')">🏛 부처별 현황</button>
-    <button class="tab-btn"         onclick="switchTab('list')">📄 세부·내역사업 목록</button>
+    <button class="tab-btn core10 active" onclick="switchTab('core10')">🎯 10대 핵심투자분야</button>
+    <button class="tab-btn"              onclick="switchTab('strategic')">🔬 국가전략기술</button>
+    <button class="tab-btn"              onclick="switchTab('policy')">📋 정책분야</button>
+    <button class="tab-btn"              onclick="switchTab('ministry')">🏛 부처별 현황</button>
+    <button class="tab-btn"              onclick="switchTab('list')">📄 세부·내역사업 목록</button>
+    <button class="tab-btn"              onclick="switchTab('unclassified')" style="color:#64748b">⬜ 미분류 사업</button>
     <button class="tab-btn" style="color:#f59e0b;margin-left:auto" onclick="window.open('map3d.html','_blank')">🏙 3D 맵 ↗</button>
   </div>
 </div>
@@ -253,52 +253,8 @@ tr:hover td{background:#f8fbff}
   <!-- CONTENT -->
   <main class="content">
 
-    <!-- ① 종합 현황 -->
-    <div class="tab-panel active" id="panel-overview">
-      <div class="kpi-row">
-        <div class="kpi-card blue">
-          <div class="kpi-label">필터 적용 총 예산</div>
-          <div class="kpi-value" id="k-budget">-<span class="kpi-unit">조원</span></div>
-          <div class="kpi-sub" id="k-budget-pct"></div>
-        </div>
-        <div class="kpi-card green">
-          <div class="kpi-label">세부사업 수</div>
-          <div class="kpi-value" id="k-sub">-<span class="kpi-unit">개</span></div>
-          <div class="kpi-sub" id="k-sub-pct"></div>
-        </div>
-        <div class="kpi-card yellow">
-          <div class="kpi-label">내역사업 수</div>
-          <div class="kpi-value" id="k-detail">-<span class="kpi-unit">개</span></div>
-          <div class="kpi-sub" id="k-detail-avg"></div>
-        </div>
-        <div class="kpi-card purple">
-          <div class="kpi-label">전략기술 해당 예산</div>
-          <div class="kpi-value" id="k-st-budget">-<span class="kpi-unit">조원</span></div>
-          <div class="kpi-sub" id="k-st-pct"></div>
-        </div>
-      </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#2563eb"></div>국가전략기술별 예산</div>
-          <div class="chart-wrap"><canvas id="ov-st-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>정책분야별 예산</div>
-          <div class="chart-wrap"><canvas id="ov-pf-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#059669"></div>부처별 R&D 예산 TOP 15</div>
-          <div class="chart-wrap tall"><canvas id="ov-min-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><div class="chart-title-dot" style="background:#d97706"></div>전문위원회별 예산</div>
-          <div class="chart-wrap tall"><canvas id="ov-com-chart"></canvas></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ② 10대 핵심투자분야 -->
-    <div class="tab-panel" id="panel-core10">
+    <!-- ① 10대 핵심투자분야 (첫 탭) -->
+    <div class="tab-panel active" id="panel-core10">
       <div class="core10-grid" id="core10-cards"></div>
       <div class="chart-card wide">
         <div class="chart-title"><div class="chart-title-dot" style="background:#7c3aed"></div>10대 핵심투자분야별 예산 현황 (백만원)</div>
@@ -468,6 +424,63 @@ tr:hover td{background:#f8fbff}
       </div>
     </div>
 
+    <!-- ⑥ 미분류 사업 -->
+    <div class="tab-panel" id="panel-unclassified">
+      <div class="kpi-row">
+        <div class="kpi-card blue">
+          <div class="kpi-label">미분류 세부사업</div>
+          <div class="kpi-value" id="unc-k-sub">-<span class="kpi-unit">개</span></div>
+          <div class="kpi-sub" id="unc-k-sub-pct"></div>
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-label">미분류 예산 합계</div>
+          <div class="kpi-value" id="unc-k-budget">-<span class="kpi-unit">조원</span></div>
+          <div class="kpi-sub" id="unc-k-budget-pct"></div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">전문위원회 수</div>
+          <div class="kpi-value" id="unc-k-com">-<span class="kpi-unit">개</span></div>
+          <div class="kpi-sub">전략기술·정책분야 미해당</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">평균 사업 예산</div>
+          <div class="kpi-value" id="unc-k-avg">-<span class="kpi-unit">억원</span></div>
+          <div class="kpi-sub" id="unc-k-avg-sub"></div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title"><div class="chart-title-dot" style="background:#64748b"></div>전문위별 미분류 예산</div>
+          <div class="chart-wrap"><canvas id="unc-com-chart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title"><div class="chart-title-dot" style="background:#94a3b8"></div>전문위별 사업 수</div>
+          <div class="chart-wrap"><canvas id="unc-cnt-chart"></canvas></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">미분류 세부사업 목록 (전문위별 분류)</div>
+          <div class="table-meta"><span class="badge badge-gray" id="unc-table-count"></span></div>
+        </div>
+        <div class="table-wrap">
+          <table id="unc-table">
+            <thead><tr>
+              <th class="nosort" style="width:30px"></th>
+              <th class="nosort">#</th>
+              <th onclick="uncSortBy('name')" id="unc-th-name">세부사업명</th>
+              <th onclick="uncSortBy('ministry')" id="unc-th-ministry">부처</th>
+              <th onclick="uncSortBy('committee')" id="unc-th-committee">전문위 ▲</th>
+              <th onclick="uncSortBy('budget')" id="unc-th-budget">예산(백만원)</th>
+              <th class="nosort">내역수</th>
+            </tr></thead>
+            <tbody id="unc-table-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="unc-pagination"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -519,7 +532,7 @@ const CORE10 = [
 //  상태
 // ══════════════════════════════════════════
 let allData=[], filtered=[];
-let currentTab='overview';
+let currentTab='core10';
 let listPage=1; const LIST_PAGE=20;
 let listSortKey='budget', listSortDir=-1;
 let stSortKey='budget',   stSortDir=-1;
@@ -551,7 +564,7 @@ function initUI(){
 // ══════════════════════════════════════════
 //  탭 전환
 // ══════════════════════════════════════════
-const TAB_IDS=['overview','core10','strategic','policy','ministry','list'];
+const TAB_IDS=['core10','strategic','policy','ministry','list','unclassified'];
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',TAB_IDS[i]===tab));
@@ -627,12 +640,12 @@ function applyFilters(){
 
 function renderCurrentTab(){
   switch(currentTab){
-    case 'overview':  renderOverview();  break;
-    case 'core10':    renderCore10();    break;
-    case 'strategic': renderStrategic(); break;
-    case 'policy':    renderPolicy();    break;
-    case 'ministry':  renderMinistry();  break;
-    case 'list':      renderList();      break;
+    case 'core10':        renderCore10();        break;
+    case 'strategic':     renderStrategic();     break;
+    case 'policy':        renderPolicy();        break;
+    case 'ministry':      renderMinistry();      break;
+    case 'list':          renderList();          break;
+    case 'unclassified':  renderUnclassified();  break;
   }
 }
 
@@ -657,46 +670,6 @@ function barY(v){
   if(v>=10000)  return(v/10000).toFixed(0)+'백억';
   if(v>=100)    return(v/100).toFixed(0)+'억';
   return v+'백만';
-}
-
-// ══ ① 종합 현황 ══
-function renderOverview(){
-  renderOverviewKPI();
-}
-
-function renderOverviewKPI(){
-  const tb=allData.reduce((s,r)=>s+r.budget,0);
-  const fb=filtered.reduce((s,r)=>s+r.budget,0);
-  const fc=filtered.length;
-  const stBud=filtered.reduce((s,r)=>s+ST_NAMES.reduce((ss,n)=>ss+(r.strategic[n]||0),0),0);
-  const fd=filtered.reduce((s,r)=>s+r.details.length,0);
-
-  document.getElementById('k-budget').innerHTML=`${(fb/1000000).toFixed(2)}<span class="kpi-unit">조원</span>`;
-  document.getElementById('k-budget-pct').textContent=`전체 대비 ${pct(fb,tb)}`;
-  document.getElementById('k-sub').innerHTML=`${fc.toLocaleString()}<span class="kpi-unit">개</span>`;
-  document.getElementById('k-sub-pct').textContent=`전체 ${allData.length}개 대비 ${pct(fc,allData.length)}`;
-  document.getElementById('k-detail').innerHTML=`${fd.toLocaleString()}<span class="kpi-unit">개</span>`;
-  document.getElementById('k-detail-avg').textContent=`세부사업당 평균 ${fc?(fd/fc).toFixed(1):0}개`;
-  document.getElementById('k-st-budget').innerHTML=`${(stBud/1000000).toFixed(2)}<span class="kpi-unit">조원</span>`;
-  document.getElementById('k-st-pct').textContent=`전체 예산 대비 ${pct(stBud,fb)}`;
-
-  const stD=ST_NAMES.map(n=>filtered.reduce((s,r)=>s+(r.strategic[n]||0),0));
-  mkChart('ov-st-chart',{type:'bar',data:{labels:ST_NAMES,datasets:[{data:stD,backgroundColor:ST_COLORS.map(c=>c+'33'),borderColor:ST_COLORS,borderWidth:1.5,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtBudget(c.raw)}}},
-    scales:{x:{ticks:{color:TC,font:{size:10}},grid:GRID},y:{ticks:{color:TC,font:{size:10},callback:barY},grid:GRID}}}});
-
-  const pfD=PF_NAMES.map(n=>filtered.reduce((s,r)=>s+(r.policy[n]||0),0));
-  mkChart('ov-pf-chart',{type:'doughnut',data:{labels:PF_NAMES,datasets:[{data:pfD,backgroundColor:PF_COLORS,borderColor:'#fff',borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#334155',font:{size:11},padding:8,boxWidth:12}},
-    tooltip:{callbacks:{label:c=>`${c.label}: ${fmtBudget(c.raw)} (${pct(c.raw,c.dataset.data.reduce((a,b)=>a+b,0))})`}}}}});
-
-  const mMap={};filtered.forEach(r=>{mMap[r.ministry]=(mMap[r.ministry]||0)+r.budget;});
-  const mE=Object.entries(mMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
-  mkChart('ov-min-chart',hbarCfg(mE.map(e=>e[0]),mE.map(e=>e[1]),ST_COLORS));
-
-  const cMap={};filtered.forEach(r=>{cMap[r.committee]=(cMap[r.committee]||0)+r.budget;});
-  const cE=Object.entries(cMap).sort((a,b)=>b[1]-a[1]);
-  mkChart('ov-com-chart',hbarCfg(cE.map(e=>e[0]),cE.map(e=>e[1]),PF_COLORS));
 }
 
 function hbarCfg(labels,data,colors){
@@ -1097,6 +1070,133 @@ function goListPage(p){
   if(p<1||p>pages)return;
   listPage=p; expandedRows.clear(); renderList();
   document.querySelector('.table-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══════════════════════════════════════════
+//  ⑥ 미분류 사업
+// ══════════════════════════════════════════
+const UNC_PAGE=20;
+let uncPage=1, uncSortKey='committee', uncSortDir=1;
+const COM_COLORS=['#64748b','#475569','#6b7280','#52525b','#4b5563','#57534e','#737373','#6b7280','#71717a'];
+
+function renderUnclassified(){
+  // 필터 적용된 데이터 중 미분류만
+  const uncData=filtered.filter(r=>
+    !ST_NAMES.some(n=>(r.strategic[n]||0)>0) &&
+    !PF_NAMES.some(n=>(r.policy[n]||0)>0)
+  );
+
+  const totalBudget=allData.reduce((s,r)=>s+r.budget,0);
+  const uncBudget=uncData.reduce((s,r)=>s+r.budget,0);
+  const coms=[...new Set(uncData.map(r=>r.committee))];
+  const avg=uncData.length?uncBudget/uncData.length:0;
+  const maxB=uncData.reduce((m,r)=>Math.max(m,r.budget),0);
+
+  document.getElementById('unc-k-sub').innerHTML=`${uncData.length.toLocaleString()}<span class="kpi-unit">개</span>`;
+  document.getElementById('unc-k-sub-pct').textContent=`전체 ${allData.length}개 대비 ${pct(uncData.length,allData.length)}`;
+  document.getElementById('unc-k-budget').innerHTML=`${(uncBudget/1000000).toFixed(2)}<span class="kpi-unit">조원</span>`;
+  document.getElementById('unc-k-budget-pct').textContent=`전체 예산 대비 ${pct(uncBudget,totalBudget)}`;
+  document.getElementById('unc-k-com').innerHTML=`${coms.length}<span class="kpi-unit">개</span>`;
+  document.getElementById('unc-k-avg').innerHTML=`${(avg/100).toFixed(0)}<span class="kpi-unit">억원</span>`;
+  document.getElementById('unc-k-avg-sub').textContent=`최대 ${(maxB/100).toFixed(0)}억원`;
+
+  // 전문위별 집계
+  const comMap={};
+  uncData.forEach(r=>{
+    if(!comMap[r.committee]) comMap[r.committee]={budget:0,count:0};
+    comMap[r.committee].budget+=r.budget;
+    comMap[r.committee].count++;
+  });
+  const comEntries=Object.entries(comMap).sort((a,b)=>b[1].budget-a[1].budget);
+  const comLabels=comEntries.map(e=>e[0]);
+  const comBudgets=comEntries.map(e=>e[1].budget);
+  const comCounts=comEntries.map(e=>e[1].count);
+  const cols=comLabels.map((_,i)=>COM_COLORS[i%COM_COLORS.length]);
+
+  mkChart('unc-com-chart',{type:'bar',
+    data:{labels:comLabels,datasets:[{data:comBudgets,backgroundColor:cols.map(c=>c+'55'),borderColor:cols,borderWidth:1.5,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtBudget(c.raw)}}},
+      scales:{x:{ticks:{color:'#334155',font:{size:11}},grid:GRID},y:{ticks:{color:TC,font:{size:10},callback:barY},grid:GRID}}}});
+
+  mkChart('unc-cnt-chart',{type:'bar',
+    data:{labels:comLabels,datasets:[{data:comCounts,backgroundColor:cols.map(c=>c+'55'),borderColor:cols,borderWidth:1.5,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw}개`}}},
+      scales:{x:{ticks:{color:'#334155',font:{size:11}},grid:GRID},y:{ticks:{color:TC,font:{size:10}},grid:GRID}}}});
+
+  // 테이블: 전문위 기준 정렬
+  const sorted=[...uncData].sort((a,b)=>{
+    if(uncSortKey==='committee'||uncSortKey==='ministry'||uncSortKey==='name'){
+      const av=a[uncSortKey]||''; const bv=b[uncSortKey]||'';
+      return uncSortDir*(av<bv?-1:av>bv?1:0);
+    }
+    return uncSortDir*(b[uncSortKey]-a[uncSortKey]);
+  });
+
+  document.getElementById('unc-table-count').textContent=`${uncData.length.toLocaleString()}개`;
+  const start=(uncPage-1)*UNC_PAGE;
+  const page=sorted.slice(start,start+UNC_PAGE);
+  const tbody=document.getElementById('unc-table-body');
+  tbody.innerHTML='';
+  // 전문위 그룹 배경색 맵
+  const comColorMap={};
+  comLabels.forEach((c,i)=>comColorMap[c]=COM_COLORS[i%COM_COLORS.length]);
+
+  page.forEach((r,i)=>{
+    const comCol=comColorMap[r.committee]||'#64748b';
+    const mainRow=document.createElement('tr');
+    mainRow.innerHTML=`
+      <td><button class="expand-btn${expandedRows.has(r.id)?' open':''}" onclick="toggleDetail('${r.id}',this)" ${r.details.length?'':'disabled style="opacity:.3;cursor:default"'}>${r.details.length?'▶':'–'}</button></td>
+      <td style="color:#94a3b8;font-size:11px">${start+i+1}</td>
+      <td class="td-name" title="${r.name}">${r.name}</td>
+      <td><span class="chip chip-blue">${r.ministry}</span></td>
+      <td><span class="chip" style="background:${comCol}18;color:${comCol};border:1px solid ${comCol}44;font-size:11px;padding:2px 8px;border-radius:5px;font-weight:600">${r.committee}</span></td>
+      <td class="td-budget">${fmtM(r.budget)}</td>
+      <td style="text-align:center"><span class="badge ${r.details.length?'badge-blue':'badge-gray'}">${r.details.length}</span></td>`;
+    tbody.appendChild(mainRow);
+
+    const detRow=document.createElement('tr');
+    detRow.className=`detail-row${expandedRows.has(r.id)?' open':''}`;
+    detRow.id=`det-${r.id}`;
+    detRow.innerHTML=`<td colspan="7"><div class="detail-inner">
+      <table class="detail-table">
+        <thead><tr><th>#</th><th>내역사업명</th><th style="text-align:right">예산(백만원)</th></tr></thead>
+        <tbody>${r.details.map((d,j)=>`<tr><td style="color:#94a3b8">${j+1}</td><td style="font-weight:500;color:#0f172a">${d.name}</td><td style="text-align:right;font-weight:600;color:#1d4ed8">${fmtM(d.budget)}</td></tr>`).join('')}</tbody>
+      </table></div></td>`;
+    tbody.appendChild(detRow);
+  });
+
+  // 페이지네이션
+  renderUncPagination(sorted.length);
+}
+
+function uncSortBy(k){
+  if(uncSortKey===k) uncSortDir*=-1;
+  else { uncSortKey=k; uncSortDir=k==='budget'?-1:1; }
+  document.querySelectorAll('#unc-table th').forEach(t=>t.classList.remove('sorted'));
+  document.getElementById('unc-th-'+k)?.classList.add('sorted');
+  uncPage=1; renderUnclassified();
+}
+
+function renderUncPagination(total){
+  const pages=Math.ceil(total/UNC_PAGE);
+  const el=document.getElementById('unc-pagination');
+  if(pages<=1){el.innerHTML='';return;}
+  let html=`<button class="page-btn" onclick="goUncPage(${uncPage-1})" ${uncPage===1?'disabled':''}>‹</button>`;
+  const range=[];
+  for(let i=1;i<=pages;i++){if(i===1||i===pages||Math.abs(i-uncPage)<=2)range.push(i);else if(range[range.length-1]!=='…')range.push('…');}
+  range.forEach(p=>{
+    if(p==='…')html+=`<span style="color:#94a3b8;padding:0 4px">…</span>`;
+    else html+=`<button class="page-btn${p===uncPage?' active':''}" onclick="goUncPage(${p})">${p}</button>`;
+  });
+  html+=`<button class="page-btn" onclick="goUncPage(${uncPage+1})" ${uncPage===pages?'disabled':''}>›</button>`;
+  el.innerHTML=html;
+}
+function goUncPage(p){
+  const pages=Math.ceil(filtered.filter(r=>!ST_NAMES.some(n=>(r.strategic[n]||0)>0)&&!PF_NAMES.some(n=>(r.policy[n]||0)>0)).length/UNC_PAGE);
+  if(p<1||p>pages)return;
+  uncPage=p; renderUnclassified();
 }
 
 // ══════════════════════════════════════════
