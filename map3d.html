@@ -272,17 +272,19 @@ function createBuilding(b){
   group.position.set(b.x,0,b.z);
   group.userData=b;
   const baseHex=bldgColor(b);
-  const bw=b.bw, bh=b.bh;
+  // bs: 한 변 = (budget/1000)^(1/3) * 2  (10억=변2, 1조=변20)
+  const bs=b.bs||2;
   const blocks=b.blocks;
   const totBud=blocks.reduce((s,bl)=>s+bl.budget,0)||1;
   let yOff=0;
   blocks.forEach((bl,i)=>{
-    const h=Math.max(0.3,(bl.budget/totBud)*bh);
+    // 각 내역사업 블록의 높이 = 예산 비율 × 전체 높이(bs)
+    const h=Math.max(0.2,(bl.budget/totBud)*bs);
     const t=blocks.length<=1?0:i/(blocks.length-1);
     const col=new THREE.Color(baseHex);
-    col.lerp(new THREE.Color(0xffffff), 0.30*t);
+    col.lerp(new THREE.Color(0xffffff), 0.28*t);
     const mesh=new THREE.Mesh(
-      new THREE.BoxGeometry(bw,h,bw),
+      new THREE.BoxGeometry(bs,h,bs),
       new THREE.MeshLambertMaterial({color:col})
     );
     mesh.position.y=yOff+h/2;
@@ -290,12 +292,13 @@ function createBuilding(b){
     mesh.userData={building:b};
     group.add(mesh); yOff+=h;
   });
+  // 외곽선
   const edgeCol=new THREE.Color(baseHex); edgeCol.multiplyScalar(0.6);
   const edgeMat=new THREE.LineBasicMaterial({color:edgeCol,transparent:true,opacity:0.5});
   const edge=new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(bw+0.3,bh+0.2,bw+0.3)), edgeMat
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(bs+0.2,bs+0.2,bs+0.2)), edgeMat
   );
-  edge.position.y=bh/2; group.add(edge);
+  edge.position.y=bs/2; group.add(edge);
   scene.add(group);
   buildingMeshes.push({group,data:b,edgeMat,baseHex});
   if(!b.has_st&&!b.has_pf) noneObjs.push(group);
@@ -337,7 +340,10 @@ function setupLegend(D){
   });
   document.getElementById('leg-nc').textContent=noneC;
   const sc=document.getElementById('leg-scale');
-  [{l:'1조원이상',w:22,h:18,c:'#e63946'},{l:'1000억',w:16,h:13,c:'#2a9d8f'},{l:'100억',w:10,h:8,c:'#118ab2'},{l:'10억이하',w:5,h:4,c:'#94a3b8'}].forEach(s=>{
+  [{l:'1조원  (변 길이 20)',w:20,h:20,c:'#e63946'},
+   {l:'1000억 (변 길이 9.3)',w:9,h:9,c:'#2a9d8f'},
+   {l:'100억  (변 길이 4.3)',w:4,h:4,c:'#118ab2'},
+   {l:'10억   (변 길이 2)',  w:2,h:2,c:'#94a3b8'}].forEach(s=>{
     const r=document.createElement('div'); r.className='scale-row';
     r.innerHTML='<div class="scale-box" style="width:'+s.w+'px;height:'+s.h+'px;background:'+s.c+'"></div><div class="scale-text">'+s.l+'</div>';
     sc.appendChild(r);
