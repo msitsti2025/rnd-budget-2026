@@ -377,9 +377,9 @@ function setupLegend(D){
 }
 
 function setupStats(buildings){
-  document.getElementById('s-b').textContent=(buildings.reduce((s,r)=>s+r.budget,0)/1000000).toFixed(2);
+  document.getElementById('s-b').textContent=(buildings.reduce((s,r)=>s+r.bud,0)/1000000).toFixed(2);
   document.getElementById('s-s').textContent=buildings.length.toLocaleString();
-  document.getElementById('s-d').textContent=buildings.reduce((s,r)=>s+r.blocks.length,0).toLocaleString();
+  document.getElementById('s-d').textContent=buildings.reduce((s,r)=>s+(r.bl||[]).length,0).toLocaleString();
 }
 
 function setupEvents(){
