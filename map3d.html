@@ -124,7 +124,7 @@ let buildingMeshes=[],labelObjs=[],pfObjs=[],noneObjs=[];
 let showLabels=true,showPF=true,showNone=true;
 const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2();
 let hovered=null;
-const orb={isRot:false,isPan:false,lx:0,ly:0,theta:0.2,phi:0.38,radius:1200,tgt:new THREE.Vector3()};
+const orb={isRot:false,isPan:false,lx:0,ly:0,theta:0.2,phi:0.35,radius:1600,tgt:new THREE.Vector3()};
 
 async function init(){
   setT('데이터 로딩...');
@@ -151,7 +151,7 @@ async function init(){
   try { setupGround(D); } catch(e){ showErr('지면 오류: '+e.message); return; }
 
   setT('빌딩 생성...');
-  try { await buildCity(D.buildings, D.st_centers, D.pf_centers); } catch(e){ showErr('빌딩 오류: '+e.message); return; }
+  try { await buildCity(D.buildings, D.st_centers, D.pf_centers, D); } catch(e){ showErr('빌딩 오류: '+e.message); return; }
 
   setupLegend(D);
   setupStats(D.buildings);
@@ -227,30 +227,55 @@ function makeAmoeba(pts, colorHex, fillOp, lineOp, yBase, objs){
 }
 
 function setupGround(D){
-  const gm=new THREE.Mesh(new THREE.PlaneGeometry(3800,3800),
+  const gm=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),
     new THREE.MeshLambertMaterial({color:0x080d18}));
   gm.rotation.x=-Math.PI/2; gm.receiveShadow=true; scene.add(gm);
-  const gh=new THREE.GridHelper(3800,150,0x131d2e,0x131d2e);
+  const gh=new THREE.GridHelper(4000,160,0x111827,0x111827);
   gh.position.y=0.2; scene.add(gh);
 
-  // ST 아메바 (인덱스 순서)
+  // ── ST 원형 구역 (면적 ∝ 사업 수) ──
   ST_NAMES.forEach((n,i)=>{
-    makeAmoeba(D.st_amoeba[i], ST_COLORS[i], 0.18, 0.80, 0.5, null);
+    const [cx,cy]=D.st_centers[i];
+    const r=D.st_radii[i];
+    makeCircleZone(cx,cy,r,ST_COLORS[i],0.18,0.82,0.5,null);
   });
-  // PF 아메바
+  // ── PF 원형 구역 ──
   PF_NAMES.forEach((n,i)=>{
-    makeAmoeba(D.pf_amoeba[i], PF_COLORS[i], 0.14, 0.68, 0.5, pfObjs);
+    const [cx,cy]=D.pf_centers[i];
+    const r=D.pf_radii[i];
+    makeCircleZone(cx,cy,r,PF_COLORS[i],0.13,0.68,0.5,pfObjs);
   });
+  // ── 미분류 원 ──
+  if(D.none_center&&D.none_r){
+    const [nx,nz]=D.none_center;
+    makeCircleZone(nx,nz,D.none_r,'#64748b',0.10,0.45,0.5,noneObjs);
+  }
 }
 
-async function buildCity(buildings, stCenters, pfCenters){
+function makeCircleZone(cx,cy,r,colorHex,fillOp,lineOp,yBase,objs){
+  const col=new THREE.Color(colorHex);
+  const fill=new THREE.Mesh(
+    new THREE.CircleGeometry(r,72),
+    new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:fillOp,side:THREE.DoubleSide,depthWrite:false})
+  );
+  fill.rotation.x=-Math.PI/2; fill.position.set(cx,yBase,cy);
+  if(objs)objs.push(fill); scene.add(fill);
+  const ring=new THREE.Mesh(
+    new THREE.RingGeometry(r,r+3,72),
+    new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:lineOp,side:THREE.DoubleSide,depthWrite:false})
+  );
+  ring.rotation.x=-Math.PI/2; ring.position.set(cx,yBase+0.4,cy);
+  if(objs)objs.push(ring); scene.add(ring);
+}
+
+async function buildCity(buildings, stCenters, pfCenters, D){
   const CHUNK=50;
   for(let i=0;i<buildings.length;i+=CHUNK){
     buildings.slice(i,i+CHUNK).forEach(b=>createBuilding(b));
     setT('빌딩 생성... '+Math.min(i+CHUNK,buildings.length)+' / '+buildings.length);
     await new Promise(r=>setTimeout(r,0));
   }
-  // ST 라벨
+  // ST 라벨 (원 중심에)
   ST_NAMES.forEach((n,i)=>{
     const sp=makeSprite(n, ST_COLORS[i], 46);
     sp.position.set(stCenters[i][0], 14, stCenters[i][1]);
@@ -263,8 +288,9 @@ async function buildCity(buildings, stCenters, pfCenters){
     labelObjs.push(sp); pfObjs.push(sp); scene.add(sp);
   });
   // 미분류 라벨
-  const ns=makeSprite('미 분 류', NONE_COLOR, 36);
-  ns.position.set(0,14,950); labelObjs.push(ns); noneObjs.push(ns); scene.add(ns);
+  const nc=D.none_center||[0,950];
+  const ns=makeSprite('미 분 류', '#64748b', 36);
+  ns.position.set(nc[0],14,nc[1]); labelObjs.push(ns); noneObjs.push(ns); scene.add(ns);
 }
 
 function createBuilding(b){
@@ -441,7 +467,7 @@ function updateCam(){
   camera.position.set(tgt.x+radius*Math.sin(phi)*Math.sin(theta),tgt.y+radius*Math.cos(phi),tgt.z+radius*Math.sin(phi)*Math.cos(theta));
   camera.lookAt(tgt);
 }
-function resetCam(){orb.theta=0.2;orb.phi=0.38;orb.radius=1200;orb.tgt.set(0,0,0);updateCam();}
+function resetCam(){orb.theta=0.2;orb.phi=0.35;orb.radius=1600;orb.tgt.set(0,0,0);updateCam();}
 function getMeshes(){const m=[];buildingMeshes.forEach(bm=>bm.group.children.forEach(c=>{if(c.isMesh)m.push(c);}));return m;}
 
 function handleHover(e){
