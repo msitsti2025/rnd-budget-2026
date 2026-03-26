@@ -81,9 +81,9 @@ canvas{display:block}
   <div class="tb-stat"><div class="tb-sv" id="s-d">-</div><div class="tb-sl">내역사업</div></div>
   <div class="tb-sp"></div>
   <button class="tbtn" onclick="resetCam()">📷 초기시점</button>
-  <button class="tbtn on" id="b-lbl" onclick="toggleLabels()">🏷 라벨</button>
-  <button class="tbtn on" id="b-pf"  onclick="togglePF()">🔵 정책분야</button>
-  <button class="tbtn on" id="b-none" onclick="toggleNone()">⬜ 미분류</button>
+  <button class="tbtn on" id="b-lbl"  onclick="toggleLabels()">🏷 라벨</button>
+  <button class="tbtn on" id="b-st"   onclick="toggleST()">🔬 전략기술</button>
+  <button class="tbtn on" id="b-pf"   onclick="togglePF()">🔵 정책분야</button>
 </div>
 <div id="legend">
   <div class="leg-sec">12대 국가전략기술</div><div id="leg-st"></div>
@@ -120,11 +120,11 @@ function bldgColor(b){
 }
 
 let scene,camera,renderer;
-let buildingMeshes=[],labelObjs=[],pfObjs=[],noneObjs=[];
-let showLabels=true,showPF=true,showNone=true;
+let buildingMeshes=[],labelObjs=[],stObjs=[],pfObjs=[],noneObjs=[];
+let showLabels=true,showST=true,showPF=true;
 const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2();
 let hovered=null;
-const orb={isRot:false,isPan:false,lx:0,ly:0,theta:0.2,phi:0.35,radius:1600,tgt:new THREE.Vector3()};
+const orb={isRot:false,isPan:false,lx:0,ly:0,theta:0.2,phi:0.38,radius:620,tgt:new THREE.Vector3()};
 
 async function init(){
   setT('데이터 로딩...');
@@ -237,7 +237,7 @@ function setupGround(D){
   ST_NAMES.forEach((n,i)=>{
     const [cx,cy]=D.st_centers[i];
     const r=D.st_radii[i];
-    makeCircleZone(cx,cy,r,ST_COLORS[i],0.18,0.82,0.5,null);
+    makeCircleZone(cx,cy,r,ST_COLORS[i],0.18,0.82,0.5,stObjs);
   });
   // ── PF 원형 구역 ──
   PF_NAMES.forEach((n,i)=>{
@@ -467,7 +467,7 @@ function updateCam(){
   camera.position.set(tgt.x+radius*Math.sin(phi)*Math.sin(theta),tgt.y+radius*Math.cos(phi),tgt.z+radius*Math.sin(phi)*Math.cos(theta));
   camera.lookAt(tgt);
 }
-function resetCam(){orb.theta=0.2;orb.phi=0.35;orb.radius=1600;orb.tgt.set(0,0,0);updateCam();}
+function resetCam(){orb.theta=0.2;orb.phi=0.38;orb.radius=620;orb.tgt.set(0,0,0);updateCam();}
 function getMeshes(){const m=[];buildingMeshes.forEach(bm=>bm.group.children.forEach(c=>{if(c.isMesh)m.push(c);}));return m;}
 
 function handleHover(e){
@@ -527,8 +527,8 @@ function showPanel(b){
 }
 function closePanel(){document.getElementById('panel').style.display='none';}
 function toggleLabels(){showLabels=!showLabels;labelObjs.forEach(o=>o.visible=showLabels);document.getElementById('b-lbl').classList.toggle('on',showLabels);}
+function toggleST(){showST=!showST;stObjs.forEach(o=>o.visible=showST);document.getElementById('b-st').classList.toggle('on',showST);}
 function togglePF(){showPF=!showPF;pfObjs.forEach(o=>o.visible=showPF);document.getElementById('b-pf').classList.toggle('on',showPF);}
-function toggleNone(){showNone=!showNone;noneObjs.forEach(o=>o.visible=showNone);document.getElementById('b-none').classList.toggle('on',showNone);}
 function fmtB(v){if(v>=1000000)return(v/1000000).toFixed(2)+'조원';if(v>=100000)return(v/100000).toFixed(1)+'천억원';if(v>=10000)return(v/10000).toFixed(0)+'백억원';if(v>=100)return(v/100).toFixed(0)+'억원';return v+'백만원';}
 function animate(){requestAnimationFrame(animate);renderer.render(scene,camera);}
 
