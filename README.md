@@ -34,23 +34,6 @@ rnd-budget-2026/
 └── README.md       # 문서
 ```
 
-## 🚀 GitHub Pages 배포 방법
-
-### 1단계: 저장소 생성
-```bash
-# GitHub에서 새 저장소 생성 (예: rnd-budget-2026)
-# 또는 기존 저장소 사용
-```
-
-### 2단계: 파일 업로드
-```bash
-git init
-git add .
-git commit -m "초기 커밋: 2026 R&D 예산 분석 플랫폼"
-git branch -M main
-git remote add origin https://github.com/[username]/rnd-budget-2026.git
-git push -u origin main
-```
 
 ### 3단계: GitHub Pages 활성화
 1. 저장소 → **Settings** → **Pages**
